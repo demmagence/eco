@@ -103,7 +103,7 @@ class _ScanResultViewState extends State<ScanResultView> {
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         height: 200,
                         color: AppColors.surfaceVariant,
                         child: const Center(
@@ -112,7 +112,7 @@ class _ScanResultViewState extends State<ScanResultView> {
                           ),
                         ),
                       ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         height: 200,
                         color: AppColors.surfaceVariant,
                         child: const Icon(
@@ -297,7 +297,7 @@ class _ContactItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.info.withOpacity(0.1),
+              color: AppColors.info.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const Icon(

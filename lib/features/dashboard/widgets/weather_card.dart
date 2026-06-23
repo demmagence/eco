@@ -45,7 +45,7 @@ class WeatherCard extends StatelessWidget {
                   imageUrl: weather.iconUrl,
                   width: 40,
                   height: 40,
-                  errorWidget: (_, __, ___) => const Icon(
+                  errorWidget: (_, _, _) => const Icon(
                     Icons.cloud,
                     color: Colors.white,
                     size: 40,
