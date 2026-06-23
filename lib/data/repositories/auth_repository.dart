@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eco/data/services/supabase_service.dart';
@@ -10,9 +11,12 @@ class AuthRepository {
 
   Future<void> _ensureInitialized() async {
     if (!_initialized) {
+      // serverClientId is not supported on Web (the google_sign_in_web plugin
+      // asserts it is null); the client ID is supplied via the
+      // google-signin-client_id meta tag in web/index.html instead.
       await _googleSignIn.initialize(
-        clientId: ApiConstants.googleWebClientId,
-        serverClientId: ApiConstants.googleWebClientId,
+        clientId: kIsWeb ? ApiConstants.googleWebClientId : null,
+        serverClientId: kIsWeb ? null : ApiConstants.googleWebClientId,
       );
       _initialized = true;
     }
