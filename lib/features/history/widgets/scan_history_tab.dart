@@ -27,7 +27,7 @@ class ScanHistoryTab extends StatelessWidget {
             Icon(
               Icons.document_scanner_outlined,
               size: 64,
-              color: AppColors.onSurfaceVariant.withOpacity(0.4),
+              color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -86,7 +86,7 @@ class ScanHistoryTab extends StatelessWidget {
                           width: 72,
                           height: 72,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(
+                          placeholder: (_, _) => Container(
                             width: 72,
                             height: 72,
                             color: AppColors.surfaceVariant,
@@ -95,7 +95,7 @@ class ScanHistoryTab extends StatelessWidget {
                               color: AppColors.onSurfaceVariant,
                             ),
                           ),
-                          errorWidget: (_, __, ___) => Container(
+                          errorWidget: (_, _, _) => Container(
                             width: 72,
                             height: 72,
                             color: AppColors.surfaceVariant,

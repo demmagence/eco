@@ -98,7 +98,7 @@ class _ChatbotViewState extends State<ChatbotView> {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  color: AppColors.error.withOpacity(0.1),
+                  color: AppColors.error.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       const Icon(
@@ -127,7 +127,7 @@ class _ChatbotViewState extends State<ChatbotView> {
                   color: AppColors.surface,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, -2),
                     ),
@@ -313,7 +313,7 @@ class _DotAnimationState extends State<_DotAnimation>
           height: 8,
           decoration: BoxDecoration(
             color: AppColors.onSurfaceVariant
-                .withOpacity(0.3 + _animation.value * 0.5),
+                .withValues(alpha: 0.3 + _animation.value * 0.5),
             shape: BoxShape.circle,
           ),
         );

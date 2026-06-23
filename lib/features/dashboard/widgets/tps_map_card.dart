@@ -15,11 +15,7 @@ class TpsMapCard extends StatelessWidget {
           children: [
             const Row(
               children: [
-                Icon(
-                  Icons.map_outlined,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
+                Icon(Icons.map_outlined, color: AppColors.primary, size: 20),
                 SizedBox(width: 8),
                 Text(
                   AppStrings.nearbyTps,
@@ -65,7 +61,9 @@ class TpsMapCard extends StatelessWidget {
                     Text(
                       'Masukkan Google Maps API Key untuk mengaktifkan peta',
                       style: TextStyle(
-                        color: AppColors.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: AppColors.onSurfaceVariant.withValues(
+                          alpha: 0.6,
+                        ),
                         fontSize: 12,
                       ),
                       textAlign: TextAlign.center,

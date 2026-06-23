@@ -55,7 +55,7 @@ class _ProfileViewState extends State<ProfileView> {
                             width: 112,
                             height: 112,
                             fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => const Icon(
+                            errorWidget: (_, _, _) => const Icon(
                               Icons.person,
                               size: 56,
                               color: AppColors.primary,
