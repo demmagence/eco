@@ -15,6 +15,9 @@ class ChatbotViewModel extends ChangeNotifier {
   ChatSessionModel? _session;
   bool _isTyping = false;
   String? _errorMessage;
+  // Tracks whether we are loading an existing session (to prevent
+  // the view from accidentally calling initNewSession at the same time).
+  bool _isLoadingExisting = false;
 
   ChatbotViewModel({
     GeminiRepository? geminiRepository,
@@ -23,6 +26,7 @@ class ChatbotViewModel extends ChangeNotifier {
   })  : _geminiRepository = geminiRepository ?? GeminiRepository(),
         _chatRepository = chatRepository ?? ChatRepository() {
     if (sessionId != null) {
+      _isLoadingExisting = true;
       _loadExistingSession(sessionId);
     }
   }
@@ -32,6 +36,8 @@ class ChatbotViewModel extends ChangeNotifier {
   bool get isTyping => _isTyping;
   String? get errorMessage => _errorMessage;
   ChatSessionModel? get session => _session;
+  /// True while an existing session is being loaded from the database.
+  bool get isLoadingExisting => _isLoadingExisting;
 
   /// Initialize a new chat session
   Future<void> initNewSession() async {
@@ -69,8 +75,10 @@ class ChatbotViewModel extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       _messages = await _chatRepository.getMessages(sessionId);
+      _isLoadingExisting = false;
       notifyListeners();
     } catch (e) {
+      _isLoadingExisting = false;
       _errorMessage = e.toString();
       notifyListeners();
     }

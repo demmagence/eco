@@ -19,12 +19,10 @@ class _ChatbotViewState extends State<ChatbotView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final sessionId =
-          ModalRoute.of(context)?.settings.arguments as String?;
       final chatVM = context.read<ChatbotViewModel>();
-      if (sessionId != null) {
-        // Loading existing session handled in constructor
-      } else {
+      // Only start a new session if no session exists AND we are not
+      // already loading an existing session from the database.
+      if (chatVM.session == null && !chatVM.isLoadingExisting) {
         chatVM.initNewSession();
       }
     });

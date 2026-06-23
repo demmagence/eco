@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
 import 'package:eco/features/home/home_viewmodel.dart';
+import 'package:eco/features/history/history_viewmodel.dart';
 import 'package:eco/features/dashboard/dashboard_view.dart';
 import 'package:eco/features/camera/camera_view.dart';
 import 'package:eco/features/history/history_view.dart';
@@ -66,7 +67,13 @@ class HomeView extends StatelessWidget {
               ),
               child: BottomNavigationBar(
                 currentIndex: homeVM.currentIndex,
-                onTap: homeVM.setIndex,
+                onTap: (index) {
+                  homeVM.setIndex(index);
+                  // Refresh history data whenever the History tab is opened
+                  if (index == 2) {
+                    context.read<HistoryViewModel>().loadHistory();
+                  }
+                },
                 items: [
                   const BottomNavigationBarItem(
                     icon: Icon(Icons.dashboard_outlined),

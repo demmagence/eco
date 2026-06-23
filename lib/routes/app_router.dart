@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:eco/features/splash/splash_view.dart';
 import 'package:eco/features/auth/login_view.dart';
 import 'package:eco/features/home/home_view.dart';
 import 'package:eco/features/profile/profile_view.dart';
 import 'package:eco/features/chatbot/chatbot_view.dart';
+import 'package:eco/features/chatbot/chatbot_viewmodel.dart';
 import 'package:eco/features/camera/scan_result_view.dart';
+import 'package:eco/features/camera/scan_result_viewmodel.dart';
 
 class AppRouter {
   static const String splash = '/splash';
@@ -19,7 +22,18 @@ class AppRouter {
         login: (context) => const LoginView(),
         home: (context) => const HomeView(),
         profile: (context) => const ProfileView(),
-        chatbot: (context) => const ChatbotView(),
-        scanResult: (context) => const ScanResultView(),
+        chatbot: (context) {
+          // Pass sessionId (String?) from route arguments into a fresh ViewModel
+          final sessionId =
+              ModalRoute.of(context)?.settings.arguments as String?;
+          return ChangeNotifierProvider(
+            create: (_) => ChatbotViewModel(sessionId: sessionId),
+            child: const ChatbotView(),
+          );
+        },
+        scanResult: (context) => ChangeNotifierProvider(
+              create: (_) => ScanResultViewModel(),
+              child: const ScanResultView(),
+            ),
       };
 }
