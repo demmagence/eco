@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:eco/app.dart';
+import 'package:eco/data/services/supabase_service.dart';
+import 'package:eco/features/auth/auth_viewmodel.dart';
+import 'package:eco/features/dashboard/dashboard_viewmodel.dart';
+import 'package:eco/features/camera/camera_viewmodel.dart';
+import 'package:eco/features/camera/scan_result_viewmodel.dart';
+import 'package:eco/features/chatbot/chatbot_viewmodel.dart';
+import 'package:eco/features/history/history_viewmodel.dart';
+import 'package:eco/features/profile/profile_viewmodel.dart';
 
-void main() {
-  runApp(const MainApp());
-}
-
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Supabase
+  await SupabaseService.initialize();
+  
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => DashboardViewModel()),
+        ChangeNotifierProvider(create: (_) => CameraViewModel()),
+        ChangeNotifierProvider(create: (_) => ScanResultViewModel()),
+        ChangeNotifierProvider(create: (_) => ChatbotViewModel()),
+        ChangeNotifierProvider(create: (_) => HistoryViewModel()),
+        ChangeNotifierProvider(create: (_) => ProfileViewModel()),
+      ],
+      child: const EcoApp(),
+    ),
+  );
 }

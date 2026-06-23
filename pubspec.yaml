@@ -1,5 +1,5 @@
 name: eco
-description: "A new Flutter project."
+description: "Aplikasi lingkungan dengan AI - scan, analisis, dan chatbot"
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -9,6 +9,44 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  # State Management
+  provider: ^6.1.5
+
+  # Supabase Backend
+  supabase_flutter: ^2.14.0
+
+  # Authentication
+  google_sign_in: ^7.2.0
+
+  # AI / Gemini
+  google_generative_ai: ^0.4.7
+
+  # Camera & Media
+  camera: ^0.11.2
+  image_picker: ^1.2.1
+
+  # Location
+  geolocator: ^14.0.3
+  geocoding: ^3.0.0
+
+  # Maps
+  google_maps_flutter: ^2.12.0
+
+  # Networking
+  http: ^1.6.0
+
+  # UI & Media
+  cached_network_image: ^3.4.1
+  flutter_animate: ^4.5.2
+  shimmer: ^2.0.0
+
+  # Utilities
+  intl: ^0.20.2
+  permission_handler: ^12.0.1
+  path_provider: ^2.1.6
+  uuid: ^4.5.3
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
