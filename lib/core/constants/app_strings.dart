@@ -2,8 +2,8 @@ class AppStrings {
   AppStrings._();
 
   // App
-  static const String appName = 'Eco';
-  static const String appTagline = 'Jaga Lingkungan, Mulai dari Scan';
+  static const String appName = 'VibEco';
+  static const String appTagline = 'Melihat dampak masa depan dari tindakan hari ini';
 
   // Auth
   static const String signInWithGoogle = 'Masuk dengan Google';
