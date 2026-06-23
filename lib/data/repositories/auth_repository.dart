@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,38 +9,58 @@ import 'package:eco/core/constants/api_constants.dart';
 class AuthRepository {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   bool _initialized = false;
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _authEventsSub;
 
-  Future<void> _ensureInitialized() async {
-    if (!_initialized) {
-      // serverClientId is not supported on Web (the google_sign_in_web plugin
-      // asserts it is null); the client ID is supplied via the
-      // google-signin-client_id meta tag in web/index.html instead.
-      await _googleSignIn.initialize(
-        clientId: kIsWeb ? ApiConstants.googleWebClientId : null,
-        serverClientId: kIsWeb ? null : ApiConstants.googleWebClientId,
-      );
-      _initialized = true;
-    }
+  /// Initialize Google Sign-In and wire up the credential exchange. Safe to
+  /// call repeatedly; only the first call does any work.
+  ///
+  /// The google_sign_in 7.x plugin is event-driven: both the native flow
+  /// ([signInWithGoogle], mobile/desktop) and the rendered Google button
+  /// (web) emit a sign-in event on [GoogleSignIn.authenticationEvents]. We
+  /// exchange the resulting Google ID token for a Supabase session in one
+  /// place, so the rest of the app only has to watch Supabase auth state.
+  Future<void> ensureInitialized() async {
+    if (_initialized) return;
+
+    // serverClientId is not supported on Web (the google_sign_in_web plugin
+    // asserts it is null); the client ID is supplied via the
+    // google-signin-client_id meta tag in web/index.html instead.
+    await _googleSignIn.initialize(
+      clientId: kIsWeb ? ApiConstants.googleWebClientId : null,
+      serverClientId: kIsWeb ? null : ApiConstants.googleWebClientId,
+    );
+
+    _authEventsSub =
+        _googleSignIn.authenticationEvents.listen(_handleAuthenticationEvent);
+
+    _initialized = true;
   }
 
-  /// Sign in with Google via Supabase
-  Future<AuthResponse> signInWithGoogle() async {
-    await _ensureInitialized();
+  Future<void> _handleAuthenticationEvent(
+    GoogleSignInAuthenticationEvent event,
+  ) async {
+    if (event is! GoogleSignInAuthenticationEventSignIn) return;
 
-    final googleUser = await _googleSignIn.authenticate();
-    final googleAuth = googleUser.authentication;
-    final idToken = googleAuth.idToken;
-
+    final idToken = event.user.authentication.idToken;
     if (idToken == null) {
       throw Exception('Google Sign-In gagal: ID Token tidak ditemukan');
     }
 
-    final response = await SupabaseService.auth.signInWithIdToken(
+    await SupabaseService.auth.signInWithIdToken(
       provider: OAuthProvider.google,
       idToken: idToken,
     );
+  }
 
-    return response;
+  /// Trigger the native Google Sign-In flow (mobile/desktop only).
+  ///
+  /// On Web this is unsupported — `authenticate()` throws
+  /// `UnimplementedError`. Render the Google button instead (see
+  /// `features/auth/google_sign_in_button.dart`); the button emits the same
+  /// authentication event that [_handleAuthenticationEvent] consumes.
+  Future<void> signInWithGoogle() async {
+    await ensureInitialized();
+    await _googleSignIn.authenticate();
   }
 
   /// Sign out
@@ -75,4 +96,9 @@ class AuthRepository {
   /// Listen to auth state changes
   Stream<AuthState> get authStateChanges =>
       SupabaseService.auth.onAuthStateChange;
+
+  void dispose() {
+    _authEventsSub?.cancel();
+    _authEventsSub = null;
+  }
 }
