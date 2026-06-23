@@ -11,6 +11,7 @@ class AuthRepository {
   Future<void> _ensureInitialized() async {
     if (!_initialized) {
       await _googleSignIn.initialize(
+        clientId: ApiConstants.googleWebClientId,
         serverClientId: ApiConstants.googleWebClientId,
       );
       _initialized = true;
