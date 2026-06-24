@@ -16,22 +16,71 @@ class ScanResultView extends StatefulWidget {
   State<ScanResultView> createState() => _ScanResultViewState();
 }
 
-class _ScanResultViewState extends State<ScanResultView> {
+class _ScanResultViewState extends State<ScanResultView>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
+
   @override
   void initState() {
     super.initState();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.08),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Uint8List) {
-        context.read<ScanResultViewModel>().analyzeImage(args);
+        context.read<ScanResultViewModel>().analyzeImage(args).then((_) {
+          _animController.forward();
+        });
       } else if (args is ScanResultModel) {
         context.read<ScanResultViewModel>().loadExistingResult(args);
+        _animController.forward();
       }
     });
   }
 
   @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: Consumer<ScanResultViewModel>(
+        builder: (context, scanVM, child) {
+          if (scanVM.isAnalyzing) {
+            return _buildAnalyzingState();
+          }
+
+          if (scanVM.errorMessage != null) {
+            return _buildErrorState(scanVM);
+          }
+
+          return FadeTransition(
+            opacity: _fadeAnim,
+            child: SlideTransition(
+              position: _slideAnim,
+              child: _buildResultContent(scanVM),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAnalyzingState() {
     return Scaffold(
       appBar: AppBar(
         title: const Text(AppStrings.scanResult),
@@ -40,239 +89,62 @@ class _ScanResultViewState extends State<ScanResultView> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: Consumer<ScanResultViewModel>(
-        builder: (context, scanVM, child) {
-          if (scanVM.isAnalyzing) {
-            return const LoadingIndicator(
-              message: AppStrings.analyzing,
-            );
-          }
-
-          if (scanVM.errorMessage != null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: AppColors.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      scanVM.errorMessage!,
-                      style: const TextStyle(
-                        color: AppColors.onSurfaceVariant,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Kembali'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Image preview
-                if (scanVM.imageBytes != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.memory(
-                      scanVM.imageBytes!,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                else if (scanVM.imageUrl != null)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: CachedNetworkImage(
-                      imageUrl: scanVM.imageUrl!,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      placeholder: (_, _) => Container(
-                        height: 200,
-                        color: AppColors.surfaceVariant,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      errorWidget: (_, _, _) => Container(
-                        height: 200,
-                        color: AppColors.surfaceVariant,
-                        child: const Icon(
-                          Icons.broken_image,
-                          size: 48,
-                          color: AppColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ),
-                const SizedBox(height: 16),
-
-                // Environment Condition
-                if (scanVM.environmentCondition?.isNotEmpty == true)
-                  _ResultSection(
-                    icon: Icons.search,
-                    iconColor: AppColors.secondary,
-                    title: AppStrings.environmentCondition,
-                    content: scanVM.environmentCondition!,
-                  ),
-
-                // Impact Prediction
-                if (scanVM.impactPrediction?.isNotEmpty == true)
-                  _ResultSection(
-                    icon: Icons.warning_amber,
-                    iconColor: AppColors.warning,
-                    title: AppStrings.impactPrediction,
-                    content: scanVM.impactPrediction!,
-                  ),
-
-                // Suggestions
-                if (scanVM.suggestions?.isNotEmpty == true)
-                  _ResultSection(
-                    icon: Icons.lightbulb_outline,
-                    iconColor: AppColors.accent,
-                    title: AppStrings.suggestions,
-                    content: scanVM.suggestions!,
-                  ),
-
-                // Contact Agencies
-                if (scanVM.contacts.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(
-                                  Icons.phone,
-                                  color: AppColors.info,
-                                  size: 20,
-                                ),
-                              SizedBox(width: 8),
-                              Text(
-                                AppStrings.contactAgencies,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.info,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          ...scanVM.contacts.map(
-                            (contact) => _ContactItem(contact: contact),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 24),
-
-                // Save button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: scanVM.isSaved || scanVM.isSaving
-                        ? null
-                        : () => scanVM.saveResult(),
-                    icon: Icon(
-                      scanVM.isSaved
-                          ? Icons.check
-                          : Icons.save,
-                    ),
-                    label: Text(
-                      scanVM.isSaved
-                          ? 'Tersimpan'
-                          : scanVM.isSaving
-                              ? 'Menyimpan...'
-                              : AppStrings.save,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: scanVM.isSaved
-                          ? AppColors.accent
-                          : AppColors.primary,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-              ],
-            ),
-          );
-        },
-      ),
+      body: const LoadingIndicator(message: AppStrings.analyzing),
     );
   }
-}
 
-class _ResultSection extends StatelessWidget {
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String content;
-
-  const _ResultSection({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.content,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Card(
+  Widget _buildErrorState(ScanResultViewModel scanVM) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(AppStrings.scanResult),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Icon(icon, color: iconColor, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: iconColor,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.error_outline,
+                  size: 40,
+                  color: AppColors.error,
+                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                content,
-                style: const TextStyle(
-                  fontSize: 14,
+              const SizedBox(height: 16),
+              const Text(
+                'Analisis Gagal',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.onSurface,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                scanVM.errorMessage!,
+                style: const TextStyle(
+                  color: AppColors.onSurfaceVariant,
+                  fontSize: 14,
                   height: 1.5,
                 ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Kembali'),
               ),
             ],
           ),
@@ -280,68 +152,658 @@ class _ResultSection extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildResultContent(ScanResultViewModel scanVM) {
+    return CustomScrollView(
+      slivers: [
+        // Hero Header with image
+        SliverAppBar(
+          expandedHeight: 260,
+          pinned: true,
+          flexibleSpace: FlexibleSpaceBar(
+            title: const Text(
+              AppStrings.scanResult,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
+              ),
+            ),
+            background: _buildHeroImage(scanVM),
+          ),
+          leading: IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+
+        // Result body
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Section label
+                _buildSectionLabel('Hasil Analisis AI'),
+                const SizedBox(height: 12),
+
+                // Environment Condition Card
+                if (scanVM.environmentCondition?.isNotEmpty == true)
+                  _AnalysisCard(
+                    gradientColors: const [Color(0xFF1565C0), Color(0xFF5E92F3)],
+                    icon: Icons.search_rounded,
+                    title: AppStrings.environmentCondition,
+                    content: scanVM.environmentCondition!,
+                    delay: 0,
+                  ),
+
+                // Impact Prediction Card
+                if (scanVM.impactPrediction?.isNotEmpty == true)
+                  _AnalysisCard(
+                    gradientColors: const [Color(0xFFE65100), Color(0xFFFF9800)],
+                    icon: Icons.warning_amber_rounded,
+                    title: AppStrings.impactPrediction,
+                    content: scanVM.impactPrediction!,
+                    delay: 80,
+                  ),
+
+                // Suggestions Card
+                if (scanVM.suggestions?.isNotEmpty == true)
+                  _SuggestionsCard(
+                    content: scanVM.suggestions!,
+                  ),
+
+                // Contact Agencies
+                if (scanVM.contacts.isNotEmpty) ...[
+                  _buildSectionLabel('Instansi Terkait'),
+                  const SizedBox(height: 12),
+                  _ContactsCard(contacts: scanVM.contacts),
+                ],
+
+                const SizedBox(height: 24),
+
+                // Save button
+                _buildSaveButton(scanVM),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeroImage(ScanResultViewModel scanVM) {
+    Widget imageWidget;
+    if (scanVM.imageBytes != null) {
+      imageWidget = Image.memory(
+        scanVM.imageBytes!,
+        width: double.infinity,
+        height: 260,
+        fit: BoxFit.cover,
+      );
+    } else if (scanVM.imageUrl != null) {
+      imageWidget = CachedNetworkImage(
+        imageUrl: scanVM.imageUrl!,
+        width: double.infinity,
+        height: 260,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => Container(
+          color: AppColors.surfaceVariant,
+          child: const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+        errorWidget: (_, _, _) => Container(
+          color: AppColors.surfaceVariant,
+          child: const Icon(Icons.broken_image, size: 48, color: AppColors.onSurfaceVariant),
+        ),
+      );
+    } else {
+      imageWidget = Container(
+        color: AppColors.surfaceVariant,
+        child: const Center(
+          child: Icon(Icons.image_outlined, size: 64, color: AppColors.onSurfaceVariant),
+        ),
+      );
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        imageWidget,
+        // Gradient overlay for readability
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Colors.black54],
+              stops: [0.4, 1.0],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionLabel(String label) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: AppColors.onSurfaceVariant,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton(ScanResultViewModel scanVM) {
+    return SizedBox(
+      width: double.infinity,
+      height: 52,
+      child: ElevatedButton.icon(
+        onPressed: scanVM.isSaved || scanVM.isSaving
+            ? null
+            : () => scanVM.saveResult(),
+        icon: Icon(
+          scanVM.isSaved ? Icons.check_circle_rounded : Icons.save_rounded,
+          size: 20,
+        ),
+        label: Text(
+          scanVM.isSaved
+              ? 'Tersimpan'
+              : scanVM.isSaving
+                  ? 'Menyimpan...'
+                  : AppStrings.save,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: scanVM.isSaved ? AppColors.accent : AppColors.primary,
+          foregroundColor: Colors.white,
+          elevation: scanVM.isSaved ? 0 : 3,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+      ),
+    );
+  }
 }
 
-class _ContactItem extends StatelessWidget {
-  final ContactInfo contact;
+// ─── Analysis Card ───────────────────────────────────────────────────────────
 
-  const _ContactItem({required this.contact});
+class _AnalysisCard extends StatelessWidget {
+  final List<Color> gradientColors;
+  final IconData icon;
+  final String title;
+  final String content;
+  final int delay;
+
+  const _AnalysisCard({
+    required this.gradientColors,
+    required this.icon,
+    required this.title,
+    required this.content,
+    required this.delay,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: gradientColors.first.withValues(alpha: 0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Colored header strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: gradientColors,
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Content area
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              content,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.onSurface,
+                height: 1.65,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Suggestions Card (with bullet points) ───────────────────────────────────
+
+class _SuggestionsCard extends StatelessWidget {
+  final String content;
+
+  const _SuggestionsCard({required this.content});
+
+  List<String> _parseBullets(String text) {
+    // Split by newlines or numbered list patterns
+    final lines = text
+        .split(RegExp(r'\n|(?<=\.)\s+(?=\d+\.)|(?<=\n)(?=[-•*])'))
+        .map((l) => l.replaceAll(RegExp(r'^[-•*\d+\.]\s*'), '').trim())
+        .where((l) => l.isNotEmpty)
+        .toList();
+    return lines.length > 1 ? lines : [text];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bullets = _parseBullets(content);
+    final useBullets = bullets.length > 1;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF2E7D32), Color(0xFF60AD5E)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.lightbulb_rounded, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  AppStrings.suggestions,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: useBullets
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: bullets.asMap().entries.map((entry) {
+                      return _BulletPoint(
+                        index: entry.key + 1,
+                        text: entry.value,
+                        isLast: entry.key == bullets.length - 1,
+                      );
+                    }).toList(),
+                  )
+                : Text(
+                    content,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.onSurface,
+                      height: 1.65,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BulletPoint extends StatelessWidget {
+  final int index;
+  final String text;
+  final bool isLast;
+
+  const _BulletPoint({
+    required this.index,
+    required this.text,
+    required this.isLast,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Number badge
           Container(
-            width: 40,
-            height: 40,
+            width: 24,
+            height: 24,
             decoration: BoxDecoration(
-              color: AppColors.info.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(10),
+              gradient: const LinearGradient(
+                colors: [AppColors.primary, AppColors.primaryLight],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: const Icon(
-              Icons.business,
-              color: AppColors.info,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  contact.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+            child: Center(
+              child: Text(
+                '$index',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
-                if (contact.description != null)
-                  Text(
-                    contact.description!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.onSurfaceVariant,
-                    ),
-                  ),
-              ],
+              ),
             ),
           ),
-          // Phone call button
-          IconButton(
-            icon: const Icon(
-              Icons.phone,
-              color: AppColors.primary,
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.onSurface,
+                height: 1.6,
+              ),
             ),
-            onPressed: () {
-              final uri = Uri.parse('tel:${contact.phone}');
-              launchUrl(uri);
-            },
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Contacts Card ───────────────────────────────────────────────────────────
+
+class _ContactsCard extends StatelessWidget {
+  final List<ContactInfo> contacts;
+
+  const _ContactsCard({required this.contacts});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.info.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1565C0), Color(0xFF1976D2)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.phone_rounded, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  AppStrings.contactAgencies,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${contacts.length} instansi',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Contact list
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: contacts.asMap().entries.map((entry) {
+                final isLast = entry.key == contacts.length - 1;
+                return _ContactItem(
+                  contact: entry.value,
+                  showDivider: !isLast,
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ContactItem extends StatelessWidget {
+  final ContactInfo contact;
+  final bool showDivider;
+
+  const _ContactItem({required this.contact, this.showDivider = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+          child: Row(
+            children: [
+              // Avatar icon
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.account_balance_rounded,
+                  color: AppColors.info,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Name & description
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      contact.name,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.onSurface,
+                      ),
+                    ),
+                    if (contact.description != null &&
+                        contact.description!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        contact.description!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.onSurfaceVariant,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        const Icon(Icons.phone_outlined, size: 12, color: AppColors.info),
+                        const SizedBox(width: 4),
+                        Text(
+                          contact.phone,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.info,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              // Call button
+              GestureDetector(
+                onTap: () {
+                  final uri = Uri.parse('tel:${contact.phone}');
+                  launchUrl(uri);
+                },
+                child: Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.primary, AppColors.primaryLight],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.phone_rounded, color: Colors.white, size: 20),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.surfaceVariant,
+          ),
+      ],
     );
   }
 }
