@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:eco/data/models/chat_message_model.dart';
 import 'package:eco/data/models/chat_session_model.dart';
@@ -5,6 +6,8 @@ import 'package:eco/data/repositories/gemini_repository.dart';
 import 'package:eco/data/repositories/chat_repository.dart';
 import 'package:eco/core/constants/app_strings.dart';
 import 'package:uuid/uuid.dart';
+import 'package:eco/data/models/chatbot_args.dart';
+import 'package:eco/data/models/scan_result_model.dart';
 
 class ChatbotViewModel extends ChangeNotifier {
   final GeminiRepository _geminiRepository;
@@ -18,16 +21,24 @@ class ChatbotViewModel extends ChangeNotifier {
   // Tracks whether we are loading an existing session (to prevent
   // the view from accidentally calling initNewSession at the same time).
   bool _isLoadingExisting = false;
+  ScanResultModel? _scanContext;
+  Uint8List? _localImageBytes;
 
   ChatbotViewModel({
     GeminiRepository? geminiRepository,
     ChatRepository? chatRepository,
-    String? sessionId,
+    ChatbotArgs? args,
   })  : _geminiRepository = geminiRepository ?? GeminiRepository(),
         _chatRepository = chatRepository ?? ChatRepository() {
-    if (sessionId != null) {
-      _isLoadingExisting = true;
-      _loadExistingSession(sessionId);
+    if (args != null) {
+      if (args.sessionId != null) {
+        _isLoadingExisting = true;
+        _loadExistingSession(args.sessionId!);
+      } else if (args.scanContext != null) {
+        _localImageBytes = args.localImageBytes;
+        _isLoadingExisting = true;
+        initSessionWithScanContext(args.scanContext!, initialMessage: args.initialMessage);
+      }
     }
   }
 
@@ -38,6 +49,8 @@ class ChatbotViewModel extends ChangeNotifier {
   ChatSessionModel? get session => _session;
   /// True while an existing session is being loaded from the database.
   bool get isLoadingExisting => _isLoadingExisting;
+  ScanResultModel? get scanContext => _scanContext;
+  Uint8List? get localImageBytes => _localImageBytes;
 
   /// Initialize a new chat session
   Future<void> initNewSession() async {
@@ -59,6 +72,45 @@ class ChatbotViewModel extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
+      _errorMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
+  /// Initialize session with a scan result as context
+  Future<void> initSessionWithScanContext(ScanResultModel scan, {String? initialMessage}) async {
+    _scanContext = scan;
+    try {
+      _session = await _chatRepository.createSession();
+      _messages = [];
+      
+      // Initialize Gemini with the scan context
+      _geminiRepository.startChatWithScanContext(scan);
+
+      // Add the context greeting from Eco Assistant to the message list and save it
+      final greetingText = 'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
+          'Kondisi yang terdeteksi: ${scan.environmentCondition.length > 80 ? "${scan.environmentCondition.substring(0, 80)}..." : scan.environmentCondition}\n\n'
+          'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?';
+      
+      final welcomeMsg = ChatMessageModel(
+        id: _uuid.v4(),
+        sessionId: _session!.id,
+        content: greetingText,
+        isUser: false,
+        createdAt: DateTime.now(),
+      );
+      _messages.add(welcomeMsg);
+      await _chatRepository.saveMessage(welcomeMsg);
+
+      _isLoadingExisting = false;
+      notifyListeners();
+
+      // If there's an initial message, send it now
+      if (initialMessage != null && initialMessage.trim().isNotEmpty) {
+        await sendMessage(initialMessage);
+      }
+    } catch (e) {
+      _isLoadingExisting = false;
       _errorMessage = e.toString();
       notifyListeners();
     }

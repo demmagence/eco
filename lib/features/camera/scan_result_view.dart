@@ -6,7 +6,9 @@ import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
 import 'package:eco/core/widgets/loading_indicator.dart';
 import 'package:eco/data/models/scan_result_model.dart';
+import 'package:eco/data/models/chatbot_args.dart';
 import 'package:eco/features/camera/scan_result_viewmodel.dart';
+import 'package:eco/routes/app_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ScanResultView extends StatefulWidget {
@@ -21,6 +23,7 @@ class _ScanResultViewState extends State<ScanResultView>
   late AnimationController _animController;
   late Animation<double> _fadeAnim;
   late Animation<Offset> _slideAnim;
+  final TextEditingController _chatTextController = TextEditingController();
 
   @override
   void initState() {
@@ -51,6 +54,7 @@ class _ScanResultViewState extends State<ScanResultView>
   @override
   void dispose() {
     _animController.dispose();
+    _chatTextController.dispose();
     super.dispose();
   }
 
@@ -228,6 +232,11 @@ class _ScanResultViewState extends State<ScanResultView>
                   _ContactsCard(contacts: scanVM.contacts),
                 ],
 
+                const SizedBox(height: 16),
+
+                // Chat Assistant Section
+                _buildChatAssistantSection(context, scanVM),
+
                 const SizedBox(height: 24),
 
                 // Save button
@@ -346,6 +355,192 @@ class _ScanResultViewState extends State<ScanResultView>
           elevation: scanVM.isSaved ? 0 : 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
+      ),
+    );
+  }
+
+  Widget _buildChatAssistantSection(BuildContext context, ScanResultViewModel scanVM) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF2E7D32), Color(0xFF1565C0)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Tanya Eco Assistant',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ingin berdiskusi lebih lanjut mengenai hasil analisis ini? Tanyakan langsung ke Eco Assistant!',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: AppColors.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                
+                // TextField + Send button row
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _chatTextController,
+                        decoration: InputDecoration(
+                          hintText: 'Tanyakan sesuatu tentang kondisi ini...',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: AppColors.primary,
+                              width: 1.5,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: AppColors.surfaceVariant,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                        ),
+                        maxLines: 2,
+                        minLines: 1,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (val) {
+                          final text = val.trim();
+                          if (text.isNotEmpty) {
+                            Navigator.of(context).pushNamed(
+                              AppRouter.chatbot,
+                              arguments: ChatbotArgs(
+                                scanContext: scanVM.scanResult,
+                                localImageBytes: scanVM.imageBytes,
+                                initialMessage: text,
+                              ),
+                            );
+                            _chatTextController.clear();
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        final text = _chatTextController.text.trim();
+                        if (text.isNotEmpty) {
+                          Navigator.of(context).pushNamed(
+                            AppRouter.chatbot,
+                            arguments: ChatbotArgs(
+                              scanContext: scanVM.scanResult,
+                              localImageBytes: scanVM.imageBytes,
+                              initialMessage: text,
+                            ),
+                          );
+                          _chatTextController.clear();
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, AppColors.primaryLight],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.send_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Text button to go to chat directly
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                        AppRouter.chatbot,
+                        arguments: ChatbotArgs(
+                          scanContext: scanVM.scanResult,
+                          localImageBytes: scanVM.imageBytes,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.forum_outlined, size: 18),
+                    label: const Text('Buka Percakapan Chatbot'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

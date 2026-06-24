@@ -1,7 +1,10 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
+import 'package:eco/data/models/scan_result_model.dart';
 import 'package:eco/features/chatbot/chatbot_viewmodel.dart';
 
 class ChatbotView extends StatefulWidget {
@@ -73,9 +76,22 @@ class _ChatbotViewState extends State<ChatbotView> {
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                  itemCount: chatVM.messages.length +
+                  itemCount: (chatVM.scanContext != null ? 1 : 0) +
+                      chatVM.messages.length +
                       (chatVM.isTyping ? 1 : 0),
                   itemBuilder: (context, index) {
+                    // Check if scanContext card needs to be shown at index 0
+                    if (chatVM.scanContext != null) {
+                      if (index == 0) {
+                        return _ScanContextHeader(
+                          scan: chatVM.scanContext!,
+                          localImageBytes: chatVM.localImageBytes,
+                        );
+                      }
+                      // Adjust index for messages
+                      index = index - 1;
+                    }
+
                     if (index == chatVM.messages.length && chatVM.isTyping) {
                       return _TypingIndicator();
                     }
@@ -193,6 +209,187 @@ class _ChatbotViewState extends State<ChatbotView> {
   }
 }
 
+// ─── Scan Context Header Card ────────────────────────────────────────────────
+
+class _ScanContextHeader extends StatelessWidget {
+  final ScanResultModel scan;
+  final Uint8List? localImageBytes;
+
+  const _ScanContextHeader({
+    required this.scan,
+    this.localImageBytes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
+          width: 1,
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: AppColors.primary.withValues(alpha: 0.06),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.camera_alt_rounded,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Konteks Analisis Foto',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (scan.locationName != null && scan.locationName!.isNotEmpty)
+                    Expanded(
+                      child: Text(
+                        scan.locationName!,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.end,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            
+            // Content (Thumbnail + Details)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail Image Widget
+                  _buildThumbnail(),
+                  const SizedBox(width: 16),
+                  
+                  // Text details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Kondisi Terdeteksi:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          scan.environmentCondition,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.onSurface,
+                            height: 1.45,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnail() {
+    if (localImageBytes != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.memory(
+          localImageBytes!,
+          width: 76,
+          height: 76,
+          fit: BoxFit.cover,
+        ),
+      );
+    } else if (scan.imageUrl.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: CachedNetworkImage(
+          imageUrl: scan.imageUrl,
+          width: 76,
+          height: 76,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            width: 76,
+            height: 76,
+            color: AppColors.surfaceVariant,
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                ),
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            width: 76,
+            height: 76,
+            color: AppColors.surfaceVariant,
+            child: const Icon(Icons.broken_image, size: 28, color: AppColors.onSurfaceVariant),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        width: 76,
+        height: 76,
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(
+          Icons.image_outlined,
+          size: 28,
+          color: AppColors.onSurfaceVariant,
+        ),
+      );
+    }
+  }
+}
+
+// ─── Message Bubble ──────────────────────────────────────────────────────────
+
 class _MessageBubble extends StatelessWidget {
   final String content;
   final bool isUser;
@@ -233,6 +430,8 @@ class _MessageBubble extends StatelessWidget {
     );
   }
 }
+
+// ─── Typing Indicator ────────────────────────────────────────────────────────
 
 class _TypingIndicator extends StatelessWidget {
   @override

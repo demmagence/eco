@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:eco/core/constants/api_constants.dart';
+import 'package:eco/data/models/scan_result_model.dart';
 
 class GeminiService {
   late final GenerativeModel _model;
@@ -107,6 +108,34 @@ Format JSON:
             'Halo! Saya Eco Assistant 🌿 Saya siap membantu Anda dengan pertanyaan '
             'seputar lingkungan, sampah, daur ulang, dan cara menjaga bumi kita. '
             'Silakan tanya apa saja!',
+          ),
+        ]),
+      ],
+    );
+    return _chatSession!;
+  }
+
+  /// Start chat session with a scan context
+  ChatSession startChatWithScanContext(ScanResultModel scan) {
+    final contextPrompt = '''
+Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia. 
+Pengguna baru saja mengambil gambar dan menganalisisnya dengan AI. Berikut adalah data hasil analisis gambar tersebut:
+- Lokasi: ${scan.locationName ?? 'Tidak diketahui'}
+- Kondisi Lingkungan: ${scan.environmentCondition}
+- Prediksi Dampak: ${scan.impactPrediction}
+- Saran Penanganan: ${scan.suggestions}
+
+Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konteks gambar dan analisis di atas. Jawablah dengan ramah, informatif, dan berikan saran yang actionable dengan emoji yang relevan.
+''';
+
+    _chatSession = _model.startChat(
+      history: [
+        Content.text(contextPrompt),
+        Content.model([
+          TextPart(
+            'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
+            'Kondisi yang terdeteksi: ${scan.environmentCondition.length > 80 ? "${scan.environmentCondition.substring(0, 80)}..." : scan.environmentCondition}\n\n'
+            'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?',
           ),
         ]),
       ],
