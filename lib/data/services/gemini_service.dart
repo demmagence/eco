@@ -151,6 +151,70 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
     return response.text ?? '';
   }
 
+  /// Generate water quality analysis for a location
+  Future<String> generateWaterQuality({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis kualitas air di wilayah $locationInfo dalam format JSON:
+{
+  "status": "Bersih/Sedang/Tercemar",
+  "cleanliness_level": 75,
+  "description": "Deskripsi singkat kondisi kualitas air"
+}
+Berikan nilai cleanliness_level dari 0-100 (100 = sangat bersih).
+Jawab hanya dengan JSON, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '{}';
+  }
+
+  /// Generate waste type analysis for a location
+  Future<String> generateWasteAnalysis({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis jenis sampah dominan di wilayah $locationInfo dalam format JSON:
+{
+  "dominant_type": "Plastik",
+  "percentage": 45,
+  "types": [
+    {"name": "Plastik", "percentage": 45, "icon": "🥤"},
+    {"name": "Organik", "percentage": 30, "icon": "🍂"},
+    {"name": "Anorganik", "percentage": 15, "icon": "🔩"},
+    {"name": "Elektronik", "percentage": 10, "icon": "📱"}
+  ]
+}
+Jawab hanya dengan JSON, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '{}';
+  }
+
+  /// Generate environmental risk signals for a location
+  Future<String> generateEnvironmentalSignals({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis sinyal risiko lingkungan di wilayah $locationInfo dalam format JSON array:
+[
+  {
+    "type": "Gempa/Banjir/Longsor/Gunung Meletus/Cuaca Ekstrem",
+    "level": "Aman/Waspada/Peringatan Tinggi/Bahaya",
+    "description": "Deskripsi singkat status risiko",
+    "icon": "emoji relevan"
+  }
+]
+Berikan 3-5 jenis risiko lingkungan. Level harus salah satu dari: Aman, Waspada, Peringatan Tinggi, Bahaya.
+Jawab hanya dengan JSON array, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '[]';
+  }
+
   /// Reset chat session
   void resetChat() {
     _chatSession = null;

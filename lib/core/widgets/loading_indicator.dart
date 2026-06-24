@@ -3,34 +3,30 @@ import 'package:eco/core/constants/app_colors.dart';
 
 class LoadingIndicator extends StatelessWidget {
   final String? message;
-  final double size;
 
-  const LoadingIndicator({
-    super.key,
-    this.message,
-    this.size = 40,
-  });
+  const LoadingIndicator({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SizedBox(
-            width: size,
-            height: size,
-            child: const CircularProgressIndicator(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(
               strokeWidth: 3,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.accent),
+              backgroundColor: AppColors.glass,
             ),
           ),
           if (message != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               message!,
-              style: TextStyle(
-                color: AppColors.onSurfaceVariant,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
                 fontSize: 14,
               ),
               textAlign: TextAlign.center,

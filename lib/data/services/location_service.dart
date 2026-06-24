@@ -4,9 +4,11 @@ import 'package:geocoding/geocoding.dart';
 class LocationService {
   Position? _lastPosition;
   String? _lastLocationName;
+  String? _lastCityName;
 
   Position? get lastPosition => _lastPosition;
   String? get lastLocationName => _lastLocationName;
+  String? get lastCityName => _lastCityName;
 
   Future<bool> checkAndRequestPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -47,12 +49,28 @@ class LocationService {
             place.administrativeArea!,
         ];
         _lastLocationName = parts.join(', ');
+
+        // Also extract just the city name
+        _lastCityName = place.locality?.isNotEmpty == true
+            ? place.locality!
+            : (place.subAdministrativeArea ?? place.administrativeArea ?? '');
+
         return _lastLocationName!;
       }
     } catch (_) {
       // Geocoding failed, return coordinates
     }
     _lastLocationName = '${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)}';
+    _lastCityName = _lastLocationName;
     return _lastLocationName!;
+  }
+
+  /// Returns just the city / locality name (for compact AppBar display).
+  Future<String> getCityName(double latitude, double longitude) async {
+    if (_lastCityName != null) return _lastCityName!;
+
+    // If we haven't fetched location name yet, do it
+    await getLocationName(latitude, longitude);
+    return _lastCityName ?? 'Lokasi';
   }
 }

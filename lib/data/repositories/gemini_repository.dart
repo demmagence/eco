@@ -34,6 +34,18 @@ class GeminiRepository {
     _geminiService.startChatWithScanContext(scan);
   }
 
+  Future<String> generateWaterQuality({String? location}) async {
+    return _geminiService.generateWaterQuality(location: location);
+  }
+
+  Future<String> generateWasteAnalysis({String? location}) async {
+    return _geminiService.generateWasteAnalysis(location: location);
+  }
+
+  Future<String> generateEnvironmentalSignals({String? location}) async {
+    return _geminiService.generateEnvironmentalSignals(location: location);
+  }
+
   void resetChat() {
     _geminiService.resetChat();
   }
