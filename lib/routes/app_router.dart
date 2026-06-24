@@ -8,6 +8,7 @@ import 'package:eco/features/chatbot/chatbot_view.dart';
 import 'package:eco/features/chatbot/chatbot_viewmodel.dart';
 import 'package:eco/features/camera/scan_result_view.dart';
 import 'package:eco/features/camera/scan_result_viewmodel.dart';
+import 'package:eco/data/models/chatbot_args.dart';
 
 class AppRouter {
   static const String splash = '/splash';
@@ -23,11 +24,15 @@ class AppRouter {
         home: (context) => const HomeView(),
         profile: (context) => const ProfileView(),
         chatbot: (context) {
-          // Pass sessionId (String?) from route arguments into a fresh ViewModel
-          final sessionId =
-              ModalRoute.of(context)?.settings.arguments as String?;
+          final args = ModalRoute.of(context)?.settings.arguments;
+          ChatbotArgs? chatbotArgs;
+          if (args is ChatbotArgs) {
+            chatbotArgs = args;
+          } else if (args is String) {
+            chatbotArgs = ChatbotArgs(sessionId: args);
+          }
           return ChangeNotifierProvider(
-            create: (_) => ChatbotViewModel(sessionId: sessionId),
+            create: (_) => ChatbotViewModel(args: chatbotArgs),
             child: const ChatbotView(),
           );
         },

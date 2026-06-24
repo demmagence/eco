@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:eco/data/services/gemini_service.dart';
+import 'package:eco/data/models/scan_result_model.dart';
 
 class GeminiRepository {
   final GeminiService _geminiService;
@@ -27,6 +28,10 @@ class GeminiRepository {
 
   Future<String> sendChatMessage(String message) async {
     return _geminiService.sendChatMessage(message);
+  }
+
+  void startChatWithScanContext(ScanResultModel scan) {
+    _geminiService.startChatWithScanContext(scan);
   }
 
   void resetChat() {

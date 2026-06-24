@@ -44,6 +44,21 @@ class ScanResultViewModel extends ChangeNotifier {
   Uint8List? get imageBytes => _imageBytes;
   String? get imageUrl => _imageUrl;
 
+  ScanResultModel get scanResult => ScanResultModel(
+        id: '',
+        userId: SupabaseService.currentUserId ?? '',
+        imageUrl: _imageUrl ?? '',
+        environmentCondition: _environmentCondition ?? '',
+        impactPrediction: _impactPrediction ?? '',
+        suggestions: _suggestions ?? '',
+        contacts: _contacts,
+        rawAiResponse: _rawResponse ?? '',
+        createdAt: DateTime.now(),
+        latitude: _locationService.lastPosition?.latitude,
+        longitude: _locationService.lastPosition?.longitude,
+        locationName: _locationService.lastLocationName,
+      );
+
   /// Load an existing scan result (e.g. from history)
   void loadExistingResult(ScanResultModel result) {
     _imageBytes = null;
