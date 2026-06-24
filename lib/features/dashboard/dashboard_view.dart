@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:eco/core/constants/app_colors.dart';
-import 'package:eco/core/constants/app_strings.dart';
-import 'package:eco/core/widgets/loading_indicator.dart';
 import 'package:eco/core/widgets/error_widget.dart';
+import 'package:eco/core/widgets/shimmer_loading.dart';
 import 'package:eco/features/auth/auth_viewmodel.dart';
 import 'package:eco/features/dashboard/dashboard_viewmodel.dart';
+import 'package:eco/features/dashboard/widgets/dashboard_app_bar.dart';
+import 'package:eco/features/dashboard/widgets/dashboard_search_bar.dart';
+import 'package:eco/features/dashboard/widgets/category_chips.dart';
 import 'package:eco/features/dashboard/widgets/weather_card.dart';
 import 'package:eco/features/dashboard/widgets/aqi_card.dart';
-import 'package:eco/features/dashboard/widgets/scan_stats_card.dart';
-import 'package:eco/features/dashboard/widgets/daily_tip_card.dart';
-import 'package:eco/features/dashboard/widgets/news_card.dart';
-import 'package:eco/features/dashboard/widgets/tps_map_card.dart';
+import 'package:eco/features/dashboard/widgets/water_quality_card.dart';
+import 'package:eco/features/dashboard/widgets/waste_type_card.dart';
+import 'package:eco/features/dashboard/widgets/environmental_signal_card.dart';
+import 'package:eco/features/home/home_viewmodel.dart';
+import 'package:eco/routes/app_router.dart';
 
 class DashboardView extends StatefulWidget {
   const DashboardView({super.key});
@@ -34,109 +38,137 @@ class _DashboardViewState extends State<DashboardView> {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthViewModel>().user;
+
     return Consumer<DashboardViewModel>(
       builder: (context, dashVM, child) {
         if (dashVM.isLoading && dashVM.weather == null) {
-          return const LoadingIndicator(message: 'Memuat dashboard...');
-        }
-
-        if (dashVM.errorMessage != null && dashVM.weather == null) {
-          return AppErrorWidget(
-            message: dashVM.errorMessage!,
-            onRetry: dashVM.refresh,
+          return const Scaffold(
+            backgroundColor: AppColors.backgroundPrimary,
+            body: SafeArea(
+              child: DashboardShimmer(),
+            ),
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: dashVM.refresh,
-          color: AppColors.primary,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Welcome header
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${AppStrings.welcomeBack} ${dashVM.userName}!',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            dashVM.locationName,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.onSurfaceVariant,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+        if (dashVM.errorMessage != null && dashVM.weather == null) {
+          return Scaffold(
+            backgroundColor: AppColors.backgroundPrimary,
+            body: SafeArea(
+              child: AppErrorWidget(
+                message: dashVM.errorMessage!,
+                onRetry: dashVM.refresh,
               ),
+            ),
+          );
+        }
 
-              // Weather & AQI row
-              if (dashVM.weather != null || dashVM.aqi != null)
-                Row(
-                  children: [
-                    if (dashVM.weather != null)
-                      Expanded(
-                        child: WeatherCard(weather: dashVM.weather!),
-                      ),
-                    if (dashVM.weather != null && dashVM.aqi != null)
-                      const SizedBox(width: 12),
-                    if (dashVM.aqi != null)
-                      Expanded(
-                        child: AqiCard(aqi: dashVM.aqi!),
-                      ),
-                  ],
-                ),
+        final showWeather = dashVM.selectedCategory == DashboardCategory.all ||
+            dashVM.selectedCategory == DashboardCategory.weather;
+        final showEcology = dashVM.selectedCategory == DashboardCategory.all ||
+            dashVM.selectedCategory == DashboardCategory.ecology;
 
-              const SizedBox(height: 12),
+        return Scaffold(
+          backgroundColor: AppColors.backgroundPrimary,
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: dashVM.refresh,
+              color: AppColors.accent,
+              backgroundColor: AppColors.backgroundSecondary,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                children: [
+                  // Custom App Bar
+                  DashboardAppBar(
+                    currentTime: dashVM.currentTime,
+                    cityName: dashVM.cityName,
+                    user: user,
+                    onLocationTap: dashVM.refresh,
+                    onProfileTap: () {
+                      final authVM = context.read<AuthViewModel>();
+                      Navigator.pushNamed(context, AppRouter.profile).then((_) {
+                        // Reload user profile in case it changed
+                        authVM.loadUserProfile();
+                      });
+                    },
+                  ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0),
 
-              // Scan Stats
-              ScanStatsCard(totalScans: dashVM.totalScans),
+                  const SizedBox(height: 24),
 
-              const SizedBox(height: 12),
+                  // Search Bar with Filter
+                  DashboardSearchBar(
+                    query: dashVM.searchQuery,
+                    onChanged: dashVM.setSearchQuery,
+                    onFilterTap: () => showFilterBottomSheet(context),
+                    results: dashVM.filteredFeatures,
+                    onResultTap: (featureName) {
+                      if (featureName == 'Cuaca' || featureName == 'Kualitas Udara') {
+                        dashVM.setCategory(DashboardCategory.weather);
+                        dashVM.setSearchQuery('');
+                      } else if (featureName == 'Kualitas Air' || featureName == 'Prediksi Lingkungan') {
+                        dashVM.setCategory(DashboardCategory.ecology);
+                        dashVM.setSearchQuery('');
+                      } else if (featureName == 'Kamera') {
+                        context.read<HomeViewModel>().setIndex(1);
+                        dashVM.setSearchQuery('');
+                      } else if (featureName == 'Histori Scan') {
+                        context.read<HomeViewModel>().setIndex(2);
+                        dashVM.setSearchQuery('');
+                      } else if (featureName == 'Chatbot') {
+                        Navigator.pushNamed(context, AppRouter.chatbot);
+                        dashVM.setSearchQuery('');
+                      }
+                    },
+                  ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
 
-              // Daily Tip
-              if (dashVM.dailyTip != null)
-                DailyTipCard(
-                  tip: dashVM.dailyTip!,
-                  detail: dashVM.dailyTipDetail,
-                  emoji: dashVM.dailyTipEmoji,
-                ),
+                  const SizedBox(height: 20),
 
-              if (dashVM.dailyTip != null) const SizedBox(height: 12),
+                  // Category Chips
+                  CategoryChips(
+                    selected: dashVM.selectedCategory,
+                    onSelected: dashVM.setCategory,
+                  ).animate().fadeIn(duration: 400.ms, delay: 150.ms),
 
-              // News
-              if (dashVM.news.isNotEmpty)
-                NewsCard(newsList: dashVM.news),
+                  const SizedBox(height: 24),
 
-              if (dashVM.news.isNotEmpty) const SizedBox(height: 12),
+                  // Dynamic Cards list with stagger animation
+                  Column(
+                    children: [
+                      // Weather Section
+                      if (showWeather && dashVM.weather != null) ...[
+                        WeatherCard(weather: dashVM.weather!),
+                        const SizedBox(height: 16),
+                      ],
 
-              // TPS Map
-              const TpsMapCard(),
+                      // AQI Section
+                      if (showWeather && dashVM.aqi != null) ...[
+                        AqiCard(aqi: dashVM.aqi!),
+                        const SizedBox(height: 16),
+                      ],
 
-              const SizedBox(height: 24),
-            ],
+                      // Ecology Sections
+                      if (showEcology && dashVM.waterQuality != null) ...[
+                        WaterQualityCard(waterQuality: dashVM.waterQuality!),
+                        const SizedBox(height: 16),
+                      ],
+
+                      if (showEcology && dashVM.wasteType != null) ...[
+                        WasteTypeCard(wasteType: dashVM.wasteType!),
+                        const SizedBox(height: 16),
+                      ],
+
+                      if (showEcology) ...[
+                        EnvironmentalSignalCard(signals: dashVM.environmentalSignals),
+                        const SizedBox(height: 16),
+                      ],
+                    ],
+                  ).animate().fadeIn(duration: 400.ms, delay: 200.ms).slideY(begin: 0.05, end: 0),
+
+                  const SizedBox(height: 80), // extra padding for floating navigation bar
+                ],
+              ),
+            ),
           ),
         );
       },

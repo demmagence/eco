@@ -23,9 +23,11 @@ class SupabaseService {
   static SupabaseQueryBuilder get chatSessions => client.from('chat_sessions');
   static SupabaseQueryBuilder get chatMessages => client.from('chat_messages');
 
-  // Storage bucket
+  // Storage buckets
   static StorageFileApi get scanImagesBucket =>
       storage.from(ApiConstants.scanImagesBucket);
+  static StorageFileApi get avatarsBucket =>
+      storage.from('avatars');
 
   // Current user
   static User? get currentUser => auth.currentUser;

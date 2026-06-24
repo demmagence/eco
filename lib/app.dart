@@ -9,7 +9,7 @@ class EcoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'VibEco',
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
       initialRoute: AppRouter.splash,
       routes: AppRouter.routes,
