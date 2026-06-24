@@ -1,4 +1,4 @@
-package com.example.eco
+package com.vibeco.app
 
 import io.flutter.embedding.android.FlutterActivity
 
