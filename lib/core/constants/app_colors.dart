@@ -62,6 +62,67 @@ class AppColors {
   static const Color signalInstruction = Color(0xFF3B82F6);   // Biru — Instruksi Khusus
   static const Color signalInfo = Colors.white;               // Putih — Informasi Umum
 
+  // ══════════════════════════════════════════════════════════════════
+  // ── LIGHT MODE PREMIUM PALETTE ────────────────────────────────────
+  // ══════════════════════════════════════════════════════════════════
+
+  // Primary backgrounds
+  static const Color lightBackground = Color(0xFFF6FAF8);
+  static const Color lightCardBackground = Color(0xFFFFFFFF);
+
+  // Emerald palette
+  static const Color lightPrimaryEmerald = Color(0xFF0F4D3A);
+  static const Color lightDarkEmerald = Color(0xFF06241B);
+  static const Color lightSecondaryEmerald = Color(0xFF1A6B53);
+  static const Color lightAccentEmerald = Color(0xFF34D399);
+
+  // Semantic (light mode)
+  static const Color lightSuccess = Color(0xFF16A34A);
+  static const Color lightWarning = Color(0xFFF59E0B);
+  static const Color lightDanger = Color(0xFFDC2626);
+
+  // Border & Shadow (light mode)
+  static const Color lightBorder = Color(0xFFE6F4EE);
+  static const Color lightShadow = Color(0x140F4D3A); // rgba(15,77,58,0.08)
+
+  // Text (light mode)
+  static const Color lightTextPrimary = Color(0xFF06241B);
+  static const Color lightTextSecondary = Color(0xFF4A6B5D);
+  static const Color lightTextMuted = Color(0xFF8BA69A);
+  static const Color lightTextAccent = Color(0xFF0F4D3A);
+
+  // Glass / Surface (light mode)
+  static Color lightGlass = Colors.white.withValues(alpha: 0.85);
+  static Color lightGlassBorder = const Color(0xFFE6F4EE);
+  static Color lightGlassOverlay = const Color(0xFF0F4D3A).withValues(alpha: 0.04);
+
+  // ── Signal Colors (Light Mode Specific) ──────────────────────────
+  static const Color lightSignalSafe = Color(0xFF16A34A);
+  static const Color lightSignalAlert = Color(0xFFEAB308);
+  static const Color lightSignalWarning = Color(0xFFF97316);
+  static const Color lightSignalDanger = Color(0xFFDC2626);
+  static const Color lightSignalMandatory = Color(0xFF2563EB);
+  static const Color lightSignalInfo = Color(0xFF64748B);
+
+  // ── Light mode gradients ──────────────────────────────────────────
+  static const LinearGradient lightEmeraldGradient = LinearGradient(
+    colors: [Color(0xFF0F4D3A), Color(0xFF1A6B53)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient lightAccentGradient = LinearGradient(
+    colors: [Color(0xFF34D399), Color(0xFF6EE7B7)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient lightSurfaceGradient = LinearGradient(
+    colors: [Color(0xFFF6FAF8), Color(0xFFEDF7F2)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
   // ── Gradients ─────────────────────────────────────────────────────
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [primaryEmerald, secondaryEmerald],
@@ -142,4 +203,29 @@ class AppColors {
         return signalInfo;
     }
   }
+
+  /// Get light mode signal color by level
+  static Color getLightSignalColor(String level) {
+    switch (level.toLowerCase()) {
+      case 'bahaya':
+        return lightSignalDanger;
+      case 'peringatan tinggi':
+      case 'peringatan':
+        return lightSignalWarning;
+      case 'waspada':
+        return lightSignalAlert;
+      case 'aman':
+        return lightSignalSafe;
+      case 'instruksi':
+      case 'instruksi khusus':
+        return lightSignalMandatory;
+      default:
+        return lightSignalInfo;
+    }
+  }
+  // ── Compatibility Aliases for Profile UI ─────────────────────────
+  static const Color divider = lightBorder;
+  static const Color shadow = lightShadow;
+  static const Color mintGreen = lightAccentEmerald;
+  static const Color danger = lightDanger;
 }
