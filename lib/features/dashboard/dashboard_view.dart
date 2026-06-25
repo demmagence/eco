@@ -44,16 +44,16 @@ class _DashboardViewState extends State<DashboardView> {
       builder: (context, dashVM, child) {
         if (dashVM.isLoading && dashVM.weather == null) {
           return const Scaffold(
-            backgroundColor: AppColors.backgroundPrimary,
+            backgroundColor: AppColors.lightBackground, // LIGHT MODE
             body: SafeArea(
-              child: DashboardShimmer(),
+              child: DashboardShimmer(), // You might need to update shimmer colors too
             ),
           );
         }
 
         if (dashVM.errorMessage != null && dashVM.weather == null) {
           return Scaffold(
-            backgroundColor: AppColors.backgroundPrimary,
+            backgroundColor: AppColors.lightBackground, // LIGHT MODE
             body: SafeArea(
               child: AppErrorWidget(
                 message: dashVM.errorMessage!,
@@ -69,12 +69,12 @@ class _DashboardViewState extends State<DashboardView> {
             dashVM.selectedCategory == DashboardCategory.ecology;
 
         return Scaffold(
-          backgroundColor: AppColors.backgroundPrimary,
+          backgroundColor: AppColors.lightBackground, // LIGHT MODE
           body: SafeArea(
             child: RefreshIndicator(
               onRefresh: dashVM.refresh,
-              color: AppColors.accent,
-              backgroundColor: AppColors.backgroundSecondary,
+              color: AppColors.lightPrimaryEmerald,
+              backgroundColor: AppColors.lightCardBackground,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),

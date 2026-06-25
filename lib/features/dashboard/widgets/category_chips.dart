@@ -4,7 +4,7 @@ import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
 import 'package:eco/features/dashboard/dashboard_viewmodel.dart';
 
-/// Horizontal category chips: All, Weather, Ecology.
+/// Horizontal category chips — Light Mode: All, Weather, Ecology.
 class CategoryChips extends StatelessWidget {
   final DashboardCategory selected;
   final ValueChanged<DashboardCategory> onSelected;
@@ -31,14 +31,14 @@ class CategoryChips extends StatelessWidget {
           const SizedBox(width: 10),
           _Chip(
             label: AppStrings.categoryWeather,
-            icon: Icons.cloud,
+            icon: Icons.cloud_outlined,
             isSelected: selected == DashboardCategory.weather,
             onTap: () => onSelected(DashboardCategory.weather),
           ),
           const SizedBox(width: 10),
           _Chip(
             label: AppStrings.categoryEcology,
-            icon: Icons.eco,
+            icon: Icons.eco_outlined,
             isSelected: selected == DashboardCategory.ecology,
             onTap: () => onSelected(DashboardCategory.ecology),
           ),
@@ -72,22 +72,30 @@ class _Chip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.accent : AppColors.glass,
+          color: isSelected
+              ? AppColors.lightPrimaryEmerald
+              : AppColors.lightCardBackground,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? AppColors.accent
-                : AppColors.glassBorder,
+                ? AppColors.lightPrimaryEmerald
+                : AppColors.lightBorder,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.3),
+                    color: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                 ]
-              : null,
+              : [
+                  BoxShadow(
+                    color: AppColors.lightShadow,
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -96,18 +104,18 @@ class _Chip extends StatelessWidget {
               icon,
               size: 16,
               color: isSelected
-                  ? AppColors.backgroundPrimary
-                  : AppColors.textSecondary,
+                  ? Colors.white
+                  : AppColors.lightTextSecondary,
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 color: isSelected
-                    ? AppColors.backgroundPrimary
-                    : AppColors.textSecondary,
+                    ? Colors.white
+                    : AppColors.lightTextSecondary,
                 fontSize: 13,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],

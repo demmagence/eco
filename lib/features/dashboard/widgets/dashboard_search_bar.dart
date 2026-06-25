@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
 
-/// Glassmorphism search bar with filter button.
+/// Glassmorphism search bar with filter button — Light Mode
 class DashboardSearchBar extends StatelessWidget {
   final String query;
   final ValueChanged<String> onChanged;
@@ -27,19 +27,26 @@ class DashboardSearchBar extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: AppColors.glass,
+                color: AppColors.lightGlass,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.glassBorder),
+                border: Border.all(color: AppColors.lightBorder),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.lightShadow,
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.search,
-                    color: AppColors.textMuted,
+                    color: AppColors.lightTextMuted,
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -47,13 +54,14 @@ class DashboardSearchBar extends StatelessWidget {
                     child: TextField(
                       onChanged: onChanged,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.lightTextPrimary,
                         fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                       decoration: const InputDecoration(
                         hintText: AppStrings.searchHint,
                         hintStyle: TextStyle(
-                          color: AppColors.textMuted,
+                          color: AppColors.lightTextMuted,
                           fontSize: 14,
                         ),
                         border: InputBorder.none,
@@ -61,7 +69,7 @@ class DashboardSearchBar extends StatelessWidget {
                         focusedBorder: InputBorder.none,
                         filled: false,
                         contentPadding:
-                            EdgeInsets.symmetric(vertical: 14),
+                            EdgeInsets.symmetric(vertical: 16),
                       ),
                     ),
                   ),
@@ -70,12 +78,12 @@ class DashboardSearchBar extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.15),
+                        color: AppColors.lightPrimaryEmerald.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: const Icon(
                         Icons.tune,
-                        color: AppColors.accent,
+                        color: AppColors.lightPrimaryEmerald,
                         size: 18,
                       ),
                     ),
@@ -92,12 +100,19 @@ class DashboardSearchBar extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.glassMedium,
+                  color: AppColors.lightCardBackground,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.glassBorder),
+                  border: Border.all(color: AppColors.lightBorder),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.lightShadow,
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: results.map((feature) {
@@ -105,14 +120,15 @@ class DashboardSearchBar extends StatelessWidget {
                       dense: true,
                       leading: Icon(
                         feature['icon'] as IconData,
-                        color: AppColors.accent,
+                        color: AppColors.lightPrimaryEmerald,
                         size: 20,
                       ),
                       title: Text(
                         feature['name'] as String,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.lightTextPrimary,
                           fontSize: 14,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                       onTap: () =>
@@ -139,10 +155,10 @@ void showFilterBottomSheet(BuildContext context) {
       return Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppColors.backgroundSecondary,
+          color: AppColors.lightBackground,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           border: Border(
-            top: BorderSide(color: AppColors.glassBorder),
+            top: BorderSide(color: AppColors.lightBorder),
           ),
         ),
         child: Column(
@@ -154,7 +170,7 @@ void showFilterBottomSheet(BuildContext context) {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.textMuted,
+                  color: AppColors.lightTextMuted.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -163,9 +179,9 @@ void showFilterBottomSheet(BuildContext context) {
             const Text(
               AppStrings.filter,
               style: TextStyle(
-                color: Colors.white,
+                color: AppColors.lightTextPrimary,
                 fontSize: 18,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 16),
@@ -173,24 +189,24 @@ void showFilterBottomSheet(BuildContext context) {
               spacing: 10,
               runSpacing: 10,
               children: [
-                _FilterChip(label: AppStrings.featureCuaca, icon: Icons.cloud),
+                _FilterChip(label: AppStrings.featureCuaca, icon: Icons.cloud_outlined),
                 _FilterChip(
-                    label: AppStrings.featureKualitasUdara, icon: Icons.air),
+                    label: AppStrings.featureKualitasUdara, icon: Icons.air_outlined),
                 _FilterChip(
                     label: AppStrings.featureKualitasAir,
-                    icon: Icons.water_drop),
+                    icon: Icons.water_drop_outlined),
                 _FilterChip(
-                    label: AppStrings.featureHistoriScan, icon: Icons.history),
+                    label: AppStrings.featureHistoriScan, icon: Icons.history_outlined),
                 _FilterChip(
                     label: AppStrings.featureHistoriChat,
-                    icon: Icons.chat_bubble),
+                    icon: Icons.chat_bubble_outline),
                 _FilterChip(
-                    label: AppStrings.featureKamera, icon: Icons.camera_alt),
+                    label: AppStrings.featureKamera, icon: Icons.camera_alt_outlined),
                 _FilterChip(
-                    label: AppStrings.featureChatbot, icon: Icons.smart_toy),
+                    label: AppStrings.featureChatbot, icon: Icons.smart_toy_outlined),
                 _FilterChip(
                     label: AppStrings.featurePrediksiLingkungan,
-                    icon: Icons.eco),
+                    icon: Icons.eco_outlined),
               ],
             ),
             const SizedBox(height: 24),
@@ -212,20 +228,28 @@ class _FilterChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppColors.glass,
+        color: AppColors.lightCardBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.glassBorder),
+        border: Border.all(color: AppColors.lightBorder),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.lightShadow.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: AppColors.accent, size: 16),
+          Icon(icon, color: AppColors.lightPrimaryEmerald, size: 16),
           const SizedBox(width: 8),
           Text(
             label,
             style: const TextStyle(
-              color: Colors.white,
+              color: AppColors.lightTextPrimary,
               fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

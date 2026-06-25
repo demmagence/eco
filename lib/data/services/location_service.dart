@@ -58,10 +58,10 @@ class LocationService {
         return _lastLocationName!;
       }
     } catch (_) {
-      // Geocoding failed, return coordinates
+      // Geocoding failed, fallback to a named city instead of coordinates
     }
-    _lastLocationName = '${latitude.toStringAsFixed(4)}, ${longitude.toStringAsFixed(4)}';
-    _lastCityName = _lastLocationName;
+    _lastLocationName = 'Kota Bandung';
+    _lastCityName = 'Kota Bandung';
     return _lastLocationName!;
   }
 

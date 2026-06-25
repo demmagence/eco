@@ -63,57 +63,47 @@ class _FloatingBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(30),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          height: 72,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.08),
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.12),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+    return Container(
+      height: 72,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.lightPrimaryEmerald,
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.lightPrimaryEmerald.withValues(alpha: 0.3),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Dashboard Tab
-              _NavBarItem(
-                icon: Icons.dashboard_outlined,
-                activeIcon: Icons.dashboard,
-                label: AppStrings.dashboard,
-                isSelected: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
-
-              // Camera Tab (Floating Center Button)
-              _CameraFloatingButton(
-                isSelected: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-
-              // History Tab
-              _NavBarItem(
-                icon: Icons.history_outlined,
-                activeIcon: Icons.history,
-                label: AppStrings.history,
-                isSelected: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-            ],
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          // Dashboard Tab
+          _NavBarItem(
+            icon: Icons.dashboard_outlined,
+            activeIcon: Icons.dashboard,
+            label: AppStrings.dashboard,
+            isSelected: currentIndex == 0,
+            onTap: () => onTap(0),
           ),
-        ),
+
+          // Camera Tab (Floating Center Button)
+          _CameraFloatingButton(
+            isSelected: currentIndex == 1,
+            onTap: () => onTap(1),
+          ),
+
+          // History Tab
+          _NavBarItem(
+            icon: Icons.history_outlined,
+            activeIcon: Icons.history,
+            label: AppStrings.history,
+            isSelected: currentIndex == 2,
+            onTap: () => onTap(2),
+          ),
+        ],
       ),
     );
   }
@@ -147,13 +137,13 @@ class _NavBarItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.accent.withValues(alpha: 0.12)
+                  ? Colors.white.withValues(alpha: 0.2)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               isSelected ? activeIcon : icon,
-              color: isSelected ? AppColors.accent : AppColors.textSecondary,
+              color: isSelected ? Colors.white : Colors.white70,
               size: 24,
             ),
           ),
@@ -161,7 +151,7 @@ class _NavBarItem extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.accent : AppColors.textMuted,
+              color: isSelected ? Colors.white : Colors.white70,
               fontSize: 10,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
             ),

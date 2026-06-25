@@ -27,35 +27,46 @@ class ProfileAvatar extends StatelessWidget {
           Hero(
             tag: 'profile_avatar',
             child: Container(
-              width: 120,
-              height: 120,
+              width: 130,
+              height: 130,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: AppColors.surface,
                 border: Border.all(
-                  color: AppColors.accent.withValues(alpha: 0.5),
-                  width: 3,
+                  color: AppColors.primary,
+                  width: 4,
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.25),
-                    blurRadius: 20,
-                    spreadRadius: 2,
+                    color: AppColors.shadow,
+                    blurRadius: 16,
+                    offset: Offset(0, 8),
                   ),
                 ],
               ),
-              child: ClipOval(
-                child: isSaving
-                    ? _loadingState()
-                    : photoUrl != null
-                        ? CachedNetworkImage(
-                            imageUrl: photoUrl!,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => _loadingState(),
-                            errorWidget: (context, url, error) => _defaultAvatar(),
-                          )
-                        : _defaultAvatar(),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.divider,
+                      width: 1,
+                    ),
+                  ),
+                  child: ClipOval(
+                    child: isSaving
+                        ? _loadingState()
+                        : photoUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: photoUrl!,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => _loadingState(),
+                                errorWidget: (context, url, error) => _defaultAvatar(),
+                              )
+                            : _defaultAvatar(),
+                  ),
+                ),
               ),
             ),
           ),
@@ -67,25 +78,25 @@ class ProfileAvatar extends StatelessWidget {
             child: GestureDetector(
               onTap: isSaving ? null : () => _showPickerOptions(context),
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.accent,
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.backgroundPrimary,
-                    width: 2.5,
+                    color: AppColors.surface,
+                    width: 3,
                   ),
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: AppColors.shadow,
                       blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      offset: Offset(0, 4),
                     ),
                   ],
                 ),
                 child: const Icon(
                   Icons.camera_alt,
-                  color: AppColors.backgroundPrimary,
+                  color: Colors.white,
                   size: 18,
                 ),
               ),
@@ -98,24 +109,20 @@ class ProfileAvatar extends StatelessWidget {
 
   Widget _loadingState() {
     return Shimmer.fromColors(
-      baseColor: AppColors.primaryEmerald.withValues(alpha: 0.3),
-      highlightColor: AppColors.secondaryEmerald.withValues(alpha: 0.5),
+      baseColor: AppColors.divider,
+      highlightColor: AppColors.surface,
       child: Container(
-        width: 120,
-        height: 120,
-        color: AppColors.primaryEmerald,
+        color: Colors.white,
       ),
     );
   }
 
   Widget _defaultAvatar() {
     return Container(
-      width: 120,
-      height: 120,
-      color: AppColors.primaryEmerald,
+      color: AppColors.mintGreen.withValues(alpha: 0.3),
       child: const Icon(
         Icons.person,
-        color: AppColors.accent,
+        color: AppColors.primary,
         size: 60,
       ),
     );
@@ -128,12 +135,9 @@ class ProfileAvatar extends StatelessWidget {
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: AppColors.backgroundSecondary,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(
-              top: BorderSide(color: AppColors.glassBorder),
-            ),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: SafeArea(
             child: Column(
@@ -144,17 +148,27 @@ class ProfileAvatar extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.textMuted,
+                      color: AppColors.divider,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 ListTile(
-                  leading: const Icon(Icons.photo_library, color: AppColors.accent),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.mintGreen.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.photo_library, color: AppColors.primary),
+                  ),
                   title: const Text(
                     AppStrings.pickFromGallery,
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -162,12 +176,22 @@ class ProfileAvatar extends StatelessWidget {
                   },
                 ),
                 if (photoUrl != null) ...[
-                  const Divider(color: AppColors.surface),
+                  const Divider(color: AppColors.divider, height: 24),
                   ListTile(
-                    leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.danger.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.delete_outline, color: AppColors.danger),
+                    ),
                     title: const Text(
                       AppStrings.removeAvatar,
-                      style: TextStyle(color: AppColors.error),
+                      style: TextStyle(
+                        color: AppColors.danger,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pop(context);
