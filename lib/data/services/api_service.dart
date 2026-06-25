@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,11 +9,15 @@ class ApiService {
   // --- Base URL Configuration ---
   // On Web / Windows / Linux / macOS, the backend runs on localhost:3000
   // On Android Emulator, the host machine localhost is mapped to 10.0.2.2
-  static String get baseUrl {
-    if (kIsWeb) return 'http://localhost:3000/api';
-    // defaultTargetPlatform not needed, use kIsWeb and let others use localhost
-    return 'http://localhost:3000/api';
+  static String get baseServerUrl {
+    if (kIsWeb) return 'http://localhost:3000';
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:3000';
+    }
+    return 'http://localhost:3000';
   }
+
+  static String get baseUrl => '$baseServerUrl/api';
 
   // --- SharedPreferences Keys ---
   static const String _tokenKey = 'auth_jwt_token';
@@ -134,9 +138,8 @@ class ApiService {
 
   /// Resolve the full URL for a relative server path (e.g. "uploads/avatars/x.jpg")
   static String resolveUrl(String relativePath) {
-    final base = kIsWeb ? 'http://localhost:3000' : 'http://localhost:3000';
     if (relativePath.startsWith('http')) return relativePath;
-    return '$base/$relativePath';
+    return '$baseServerUrl/$relativePath';
   }
 
   /// Decode JSON response or throw formatted error
