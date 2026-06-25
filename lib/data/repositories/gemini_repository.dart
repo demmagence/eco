@@ -11,10 +11,12 @@ class GeminiRepository {
   Future<String> analyzeImage({
     required Uint8List imageBytes,
     String? locationContext,
+    String scanMode = 'multiple',
   }) async {
     return _geminiService.analyzeImage(
       imageBytes: imageBytes,
       locationContext: locationContext,
+      scanMode: scanMode,
     );
   }
 

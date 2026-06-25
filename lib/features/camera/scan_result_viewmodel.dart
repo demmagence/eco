@@ -16,10 +16,23 @@ class ScanResultViewModel extends ChangeNotifier {
   bool _isSaving = false;
   bool _isSaved = false;
   String? _errorMessage;
+
+  // ── Common ──────────────────────────────────────────────────
+  String _scanType = 'multiple';
+
+  // ── Multiple scan mode fields ────────────────────────────────
   String? _environmentCondition;
   String? _impactPrediction;
   String? _suggestions;
   List<ContactInfo> _contacts = [];
+
+  // ── Single scan mode fields ──────────────────────────────────
+  String? _correctDisposal;
+  String? _teacherMaterial;
+  String? _trashClassification;
+  String? _recyclingInfo;
+
+  // ── Image ────────────────────────────────────────────────────
   String? _rawResponse;
   Uint8List? _imageBytes;
   String? _imageUrl;
@@ -32,15 +45,25 @@ class ScanResultViewModel extends ChangeNotifier {
         _scanRepository = scanRepository ?? ScanRepository(),
         _locationService = locationService ?? LocationService();
 
-  // Getters
+  // ── Getters ──────────────────────────────────────────────────
   bool get isAnalyzing => _isAnalyzing;
   bool get isSaving => _isSaving;
   bool get isSaved => _isSaved;
   String? get errorMessage => _errorMessage;
+  String get scanType => _scanType;
+
+  // Multiple mode
   String? get environmentCondition => _environmentCondition;
   String? get impactPrediction => _impactPrediction;
   String? get suggestions => _suggestions;
   List<ContactInfo> get contacts => _contacts;
+
+  // Single mode
+  String? get correctDisposal => _correctDisposal;
+  String? get teacherMaterial => _teacherMaterial;
+  String? get trashClassification => _trashClassification;
+  String? get recyclingInfo => _recyclingInfo;
+
   Uint8List? get imageBytes => _imageBytes;
   String? get imageUrl => _imageUrl;
 
@@ -48,10 +71,15 @@ class ScanResultViewModel extends ChangeNotifier {
         id: '',
         userId: ApiService.currentUserId ?? '',
         imageUrl: _imageUrl ?? '',
-        environmentCondition: _environmentCondition ?? '',
-        impactPrediction: _impactPrediction ?? '',
-        suggestions: _suggestions ?? '',
+        scanType: _scanType,
+        environmentCondition: _environmentCondition,
+        impactPrediction: _impactPrediction,
+        suggestions: _suggestions,
         contacts: _contacts,
+        correctDisposal: _correctDisposal,
+        teacherMaterial: _teacherMaterial,
+        trashClassification: _trashClassification,
+        recyclingInfo: _recyclingInfo,
         rawAiResponse: _rawResponse ?? '',
         createdAt: DateTime.now(),
         latitude: _locationService.lastPosition?.latitude,
@@ -63,10 +91,15 @@ class ScanResultViewModel extends ChangeNotifier {
   void loadExistingResult(ScanResultModel result) {
     _imageBytes = null;
     _imageUrl = result.imageUrl;
+    _scanType = result.scanType;
     _environmentCondition = result.environmentCondition;
     _impactPrediction = result.impactPrediction;
     _suggestions = result.suggestions;
     _contacts = result.contacts;
+    _correctDisposal = result.correctDisposal;
+    _teacherMaterial = result.teacherMaterial;
+    _trashClassification = result.trashClassification;
+    _recyclingInfo = result.recyclingInfo;
     _rawResponse = result.rawAiResponse;
     _isSaved = true;
     _isSaving = false;
@@ -75,9 +108,10 @@ class ScanResultViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Analyze the captured image
-  Future<void> analyzeImage(Uint8List imageBytes) async {
+  /// Analyze the captured image in the given scan mode
+  Future<void> analyzeImage(Uint8List imageBytes, {String scanMode = 'multiple'}) async {
     _imageBytes = imageBytes;
+    _scanType = scanMode;
     _isAnalyzing = true;
     _errorMessage = null;
     notifyListeners();
@@ -97,6 +131,7 @@ class ScanResultViewModel extends ChangeNotifier {
       final response = await _geminiRepository.analyzeImage(
         imageBytes: imageBytes,
         locationContext: locationContext,
+        scanMode: scanMode,
       );
 
       _rawResponse = response;
@@ -106,23 +141,37 @@ class ScanResultViewModel extends ChangeNotifier {
         final jsonStr = _extractJson(response);
         final json = jsonDecode(jsonStr) as Map<String, dynamic>;
 
-        _environmentCondition =
-            json['kondisi_lingkungan'] as String? ?? '';
-        _impactPrediction =
-            json['prediksi_dampak'] as String? ?? '';
-        _suggestions =
-            json['saran_penanganan'] as String? ?? '';
-
-        final instansiList = json['instansi'] as List? ?? [];
-        _contacts = instansiList
-            .map((c) => ContactInfo.fromJson(c as Map<String, dynamic>))
-            .toList();
+        if (scanMode == 'single') {
+          _correctDisposal = json['cara_buang'] as String? ?? '';
+          _teacherMaterial = json['materi_edukasi'] as String? ?? '';
+          _trashClassification = json['pengelompokan'] as String? ?? '';
+          _recyclingInfo = json['daur_ulang'] as String? ?? '';
+          // Clear multiple mode fields
+          _environmentCondition = null;
+          _impactPrediction = null;
+          _suggestions = null;
+          _contacts = [];
+        } else {
+          _environmentCondition = json['kondisi_lingkungan'] as String? ?? '';
+          _impactPrediction = json['prediksi_dampak'] as String? ?? '';
+          _suggestions = json['saran_penanganan'] as String? ?? '';
+          final instansiList = json['instansi'] as List? ?? [];
+          _contacts = instansiList
+              .map((c) => ContactInfo.fromJson(c as Map<String, dynamic>))
+              .toList();
+          // Clear single mode fields
+          _correctDisposal = null;
+          _teacherMaterial = null;
+          _trashClassification = null;
+          _recyclingInfo = null;
+        }
       } catch (_) {
-        // If JSON parsing fails, use raw response
-        _environmentCondition = response;
-        _impactPrediction = '';
-        _suggestions = '';
-        _contacts = [];
+        // Fallback for non-JSON response
+        if (scanMode == 'single') {
+          _correctDisposal = response;
+        } else {
+          _environmentCondition = response;
+        }
       }
 
       _isAnalyzing = false;
@@ -134,7 +183,7 @@ class ScanResultViewModel extends ChangeNotifier {
     }
   }
 
-  /// Save scan result to Supabase
+  /// Save scan result to local server
   Future<void> saveResult() async {
     if (_imageBytes == null || _isSaving || _isSaved) return;
 
@@ -155,15 +204,20 @@ class ScanResultViewModel extends ChangeNotifier {
         locName = _locationService.lastLocationName;
       }
 
-      // Save to database
+      // Build result based on mode
       final result = ScanResultModel(
         id: '',
         userId: ApiService.currentUserId ?? '',
         imageUrl: imageUrl,
-        environmentCondition: _environmentCondition ?? '',
-        impactPrediction: _impactPrediction ?? '',
-        suggestions: _suggestions ?? '',
+        scanType: _scanType,
+        environmentCondition: _environmentCondition,
+        impactPrediction: _impactPrediction,
+        suggestions: _suggestions,
         contacts: _contacts,
+        correctDisposal: _correctDisposal,
+        teacherMaterial: _teacherMaterial,
+        trashClassification: _trashClassification,
+        recyclingInfo: _recyclingInfo,
         rawAiResponse: _rawResponse ?? '',
         createdAt: DateTime.now(),
         latitude: lat,

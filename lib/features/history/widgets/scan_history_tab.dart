@@ -113,7 +113,7 @@ class ScanHistoryTab extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              scan.environmentCondition,
+                              scan.environmentCondition ?? scan.correctDisposal ?? '',
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,

@@ -315,18 +315,23 @@ app.post('/api/scans/upload', checkDb, authenticateToken, uploadScan.single('ima
 app.post('/api/scans', checkDb, authenticateToken, async (req, res) => {
   const { 
     image_url, 
+    scan_type,
     environment_condition, 
     impact_prediction, 
     suggestions, 
     contacts, 
+    correct_disposal,
+    teacher_material,
+    trash_classification,
+    recycling_info,
     raw_ai_response,
     latitude,
     longitude,
     location_name
   } = req.body;
 
-  if (!image_url || !environment_condition) {
-    return res.status(400).json({ error: 'Gambar dan Kondisi Lingkungan wajib disertakan.' });
+  if (!image_url) {
+    return res.status(400).json({ error: 'Gambar wajib disertakan.' });
   }
 
   try {
@@ -334,8 +339,25 @@ app.post('/api/scans', checkDb, authenticateToken, async (req, res) => {
     const contactsStr = typeof contacts === 'string' ? contacts : JSON.stringify(contacts || []);
 
     await pool.query(
-      'INSERT INTO scan_results (id, user_id, image_url, environment_condition, impact_prediction, suggestions, contacts, raw_ai_response, latitude, longitude, location_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [scanId, req.user.id, image_url, environment_condition, impact_prediction || '', suggestions || '', contactsStr, raw_ai_response || '', latitude, longitude, location_name]
+      'INSERT INTO scan_results (id, user_id, image_url, scan_type, environment_condition, impact_prediction, suggestions, contacts, correct_disposal, teacher_material, trash_classification, recycling_info, raw_ai_response, latitude, longitude, location_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        scanId, 
+        req.user.id, 
+        image_url, 
+        scan_type || 'multiple', 
+        environment_condition || '', 
+        impact_prediction || '', 
+        suggestions || '', 
+        contactsStr, 
+        correct_disposal || '', 
+        teacher_material || '', 
+        trash_classification || '', 
+        recycling_info || '', 
+        raw_ai_response || '', 
+        latitude, 
+        longitude, 
+        location_name
+      ]
     );
 
     const [scans] = await pool.query('SELECT * FROM scan_results WHERE id = ?', [scanId]);
