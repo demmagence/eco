@@ -3,6 +3,17 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  // Compatibility and theme variables
+  static const Color primaryEmerald = Color(0xFF10B981);
+  static const Color secondaryEmerald = Color(0xFF34D399);
+  static const Color backgroundPrimary = Color(0xFFF8FFFB);
+  static const Color backgroundSecondary = Color(0xFFFFFFFF);
+  static const Color textPrimary = Color(0xFF06241B);
+  static const Color textSecondary = Color(0xFF4A6B5D);
+  static const Color textMuted = Color(0xFF8BA69A);
+  static const Color glass = Color(0xD9FFFFFF);
+  static const Color glassBorder = Color(0xFFE6F4EE);
+
   // Forest gradient — khusus Splash & Welcome
   static const Color forestNight = Color(0xFF06241B);
   static const Color emerald = Color(0xFF0F4D3A);

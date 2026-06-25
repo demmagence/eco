@@ -22,7 +22,7 @@ class AuthViewModel extends ChangeNotifier {
   Future<void> initialize() async {
     _isAuthenticated = _authRepository.isAuthenticated;
     if (_isAuthenticated) {
-      await loadUserProfile();
+      _user = _authRepository.currentUser;
     }
     notifyListeners();
   }
@@ -49,9 +49,9 @@ class AuthViewModel extends ChangeNotifier {
 
   /// Register user baru.
   Future<bool> signUp({
-    required String username,
     required String password,
-    required String displayName,
+    String? username,
+    String? displayName,
     String? email,
   }) async {
     _isLoading = true;
@@ -60,7 +60,35 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       _user = await _authRepository.signUp(
+        password: password,
         username: username,
+        displayName: displayName,
+        email: email,
+      );
+      _isAuthenticated = true;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Login dengan email + password via API
+  Future<bool> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _user = await _authRepository.signInWithEmailPassword(
+        email: email,
         password: password,
         displayName: displayName,
         email: email,
@@ -76,6 +104,7 @@ class AuthViewModel extends ChangeNotifier {
       return false;
     }
   }
+
 
   /// Sign out
   Future<void> signOut() async {
