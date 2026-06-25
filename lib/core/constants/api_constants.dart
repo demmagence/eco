@@ -1,10 +1,9 @@
 class ApiConstants {
   ApiConstants._();
 
-  // Supabase
-  static const String supabaseUrl = 'https://iuphhdjszrmragaxltxr.supabase.co';
-  static const String supabaseAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cGhoZGpzenJtcmFnYXhsdHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NzQsImV4cCI6MjA5Nzc2OTY3NH0.x3dS5tNomEfJF1x0ul9kpugf5bENzf2NSksE-CeVZRQ';
+  // Backend API (Node.js Local Server)
+  static const String apiBaseUrl = 'http://localhost:3000/api';
+  // For Android Emulator, use: 'http://10.0.2.2:3000/api'
 
   // Gemini AI (image analysis, daily tip, news)
   static const String geminiApiKey = 'AQ.Ab8RN6L5Cco91BLpu75s2pn59PZAzB_vB6FymagGA8qxnPCgwA';
@@ -25,10 +24,4 @@ class ApiConstants {
 
   // Google Maps
   static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
-
-  // Supabase Storage
-  static const String scanImagesBucket = 'scan-images';
-
-  // Google Sign-In
-  static const String googleWebClientId = '745237385380-a7dfl0qeq14rimu9ept8eua0kfbtjj9d.apps.googleusercontent.com';
 }

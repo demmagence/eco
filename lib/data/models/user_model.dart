@@ -1,5 +1,6 @@
 class UserModel {
   final String id;
+  final String nis;
   final String email;
   final String displayName;
   final String? username;
@@ -8,6 +9,7 @@ class UserModel {
 
   const UserModel({
     required this.id,
+    required this.nis,
     required this.email,
     required this.displayName,
     this.username,
@@ -18,19 +20,25 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
+      nis: json['nis'] as String? ?? '',
       email: json['email'] as String? ?? '',
       displayName: json['display_name'] as String? ?? '',
       username: json['username'] as String?,
       photoUrl: json['photo_url'] as String?,
-      createdAt: DateTime.parse(
-        json['created_at'] as String? ?? DateTime.now().toIso8601String(),
-      ),
+      createdAt: _parseDate(json['created_at']),
     );
+  }
+
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'nis': nis,
       'email': email,
       'display_name': displayName,
       'username': username,
@@ -41,6 +49,7 @@ class UserModel {
 
   UserModel copyWith({
     String? id,
+    String? nis,
     String? email,
     String? displayName,
     String? username,
@@ -50,6 +59,7 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
+      nis: nis ?? this.nis,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       username: username ?? this.username,
@@ -58,11 +68,11 @@ class UserModel {
     );
   }
 
-  /// Display string: if display name is empty, show username or email
+  /// Display string: if display name is empty, show username or NIS
   String get displayLabel {
     if (displayName.isNotEmpty) return displayName;
     if (username != null && username!.isNotEmpty) return '@$username';
-    return email;
+    return 'NIS: $nis';
   }
 
   /// Formatted @username

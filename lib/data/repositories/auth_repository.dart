@@ -1,104 +1,95 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:eco/data/services/supabase_service.dart';
+import 'package:eco/data/services/api_service.dart';
 import 'package:eco/data/models/user_model.dart';
-import 'package:eco/core/constants/api_constants.dart';
 
 class AuthRepository {
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  bool _initialized = false;
-  StreamSubscription<GoogleSignInAuthenticationEvent>? _authEventsSub;
+  /// Login dengan NIS dan password. Menyimpan JWT ke SharedPreferences.
+  Future<UserModel> signIn({
+    required String nis,
+    required String password,
+  }) async {
+    final response = await ApiService.post('/auth/login', {
+      'nis': nis,
+      'password': password,
+    });
 
-  /// Initialize Google Sign-In and wire up the credential exchange. Safe to
-  /// call repeatedly; only the first call does any work.
-  ///
-  /// The google_sign_in 7.x plugin is event-driven: both the native flow
-  /// ([signInWithGoogle], mobile/desktop) and the rendered Google button
-  /// (web) emit a sign-in event on [GoogleSignIn.authenticationEvents]. We
-  /// exchange the resulting Google ID token for a Supabase session in one
-  /// place, so the rest of the app only has to watch Supabase auth state.
-  Future<void> ensureInitialized() async {
-    if (_initialized) return;
+    final data = ApiService.decodeResponse(response);
+    final token = data['token'] as String;
+    final userData = data['user'] as Map<String, dynamic>;
 
-    // serverClientId is not supported on Web (the google_sign_in_web plugin
-    // asserts it is null); the client ID is supplied via the
-    // google-signin-client_id meta tag in web/index.html instead.
-    await _googleSignIn.initialize(
-      clientId: kIsWeb ? ApiConstants.googleWebClientId : null,
-      serverClientId: kIsWeb ? null : ApiConstants.googleWebClientId,
-    );
+    await ApiService.saveToken(token);
+    await ApiService.saveUser(userData);
 
-    _authEventsSub =
-        _googleSignIn.authenticationEvents.listen(_handleAuthenticationEvent);
-
-    _initialized = true;
+    return UserModel.fromJson(userData);
   }
 
-  Future<void> _handleAuthenticationEvent(
-    GoogleSignInAuthenticationEvent event,
-  ) async {
-    if (event is! GoogleSignInAuthenticationEventSignIn) return;
+  /// Registrasi siswa baru dengan NIS dan password.
+  Future<UserModel> signUp({
+    required String nis,
+    required String password,
+    required String displayName,
+    String? username,
+    String? email,
+  }) async {
+    final response = await ApiService.post('/auth/register', {
+      'nis': nis,
+      'password': password,
+      'display_name': displayName,
+      if (username != null && username.isNotEmpty) 'username': username,
+      if (email != null && email.isNotEmpty) 'email': email,
+    });
 
-    final idToken = event.user.authentication.idToken;
-    if (idToken == null) {
-      throw Exception('Google Sign-In gagal: ID Token tidak ditemukan');
-    }
+    final data = ApiService.decodeResponse(response);
+    final token = data['token'] as String;
+    final userData = data['user'] as Map<String, dynamic>;
 
-    await SupabaseService.auth.signInWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-    );
+    await ApiService.saveToken(token);
+    await ApiService.saveUser(userData);
+
+    return UserModel.fromJson(userData);
   }
 
-  /// Trigger the native Google Sign-In flow (mobile/desktop only).
-  ///
-  /// On Web this is unsupported — `authenticate()` throws
-  /// `UnimplementedError`. Render the Google button instead (see
-  /// `features/auth/google_sign_in_button.dart`); the button emits the same
-  /// authentication event that [_handleAuthenticationEvent] consumes.
-  Future<void> signInWithGoogle() async {
-    await ensureInitialized();
-    await _googleSignIn.authenticate();
-  }
-
-  /// Sign out
+  /// Sign out — hapus token dan data user lokal.
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await SupabaseService.auth.signOut();
+    await ApiService.signOut();
   }
 
-  /// Check if user is authenticated
-  bool get isAuthenticated => SupabaseService.isAuthenticated;
+  /// Periksa status autentikasi dari penyimpanan lokal.
+  bool get isAuthenticated => ApiService.isAuthenticated;
 
-  /// Get current user
-  User? get currentUser => SupabaseService.currentUser;
-
-  /// Get user profile from Supabase
+  /// Dapatkan profil user dari API (data terbaru dari server).
   Future<UserModel?> getUserProfile() async {
-    final userId = SupabaseService.currentUserId;
-    if (userId == null) return null;
+    if (!ApiService.isAuthenticated) return null;
 
-    final response = await SupabaseService.profiles
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
-
-    if (response != null) {
-      // Merge auth email with profile data
-      response['email'] = currentUser?.email ?? '';
-      return UserModel.fromJson(response);
+    try {
+      final response = await ApiService.get('/profile');
+      final data = ApiService.decodeResponse(response);
+      await ApiService.saveUser(data);
+      return UserModel.fromJson(data);
+    } catch (_) {
+      // Fallback ke data lokal dari SharedPreferences jika offline
+      return _localUser;
     }
-    return null;
   }
 
-  /// Listen to auth state changes
-  Stream<AuthState> get authStateChanges =>
-      SupabaseService.auth.onAuthStateChange;
+  /// Buat UserModel dari data lokal (SharedPreferences) sebagai fallback.
+  UserModel? get _localUser {
+    final id = ApiService.currentUserId;
+    if (id == null) return null;
 
-  void dispose() {
-    _authEventsSub?.cancel();
-    _authEventsSub = null;
+    return UserModel(
+      id: id,
+      nis: ApiService.currentUserNis ?? '',
+      email: ApiService.currentUserEmail ?? '',
+      displayName: ApiService.currentUserDisplayName ?? '',
+      username: ApiService.currentUserUsername,
+      photoUrl: ApiService.currentUserPhotoUrl,
+      createdAt: ApiService.currentUserCreatedAt != null
+          ? DateTime.tryParse(ApiService.currentUserCreatedAt!) ?? DateTime.now()
+          : DateTime.now(),
+    );
   }
+
+  /// Mengembalikan null karena tidak ada stream auth state seperti Supabase.
+  /// Pemeriksaan autentikasi dilakukan secara synchronous via isAuthenticated.
+  UserModel? get currentUser => _localUser;
 }
