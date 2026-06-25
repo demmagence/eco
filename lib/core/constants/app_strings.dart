@@ -21,6 +21,9 @@ class AppStrings {
   static const String welcomeBack = 'Selamat datang,';
   static const String weather = 'Cuaca';
   static const String airQuality = 'Kualitas Udara';
+  static const String waterQuality = 'Kualitas Air';
+  static const String wasteType = 'Jenis Sampah';
+  static const String environmentalSignal = 'Sinyal Lingkungan';
   static const String scanStats = 'Statistik Scan';
   static const String dailyTip = 'Tips Harian';
   static const String environmentNews = 'Berita Lingkungan';
@@ -30,6 +33,54 @@ class AppStrings {
   static const String humidity = 'Kelembapan';
   static const String temperature = 'Suhu';
   static const String wind = 'Angin';
+  static const String loadingLocation = 'Memuat lokasi...';
+  static const String locationUnavailable = 'Lokasi tidak tersedia';
+  static const String loadingDashboard = 'Memuat dashboard...';
+
+  // Categories
+  static const String categoryAll = 'Semua';
+  static const String categoryWeather = 'Cuaca';
+  static const String categoryEcology = 'Ekologi';
+
+  // Search
+  static const String searchHint = 'Cari fitur...';
+  static const String filter = 'Filter';
+
+  // Search feature names
+  static const String featureCuaca = 'Cuaca';
+  static const String featureKualitasUdara = 'Kualitas Udara';
+  static const String featureKualitasAir = 'Kualitas Air';
+  static const String featureHistoriScan = 'Histori Scan';
+  static const String featureHistoriChat = 'Histori Chat';
+  static const String featureKamera = 'Kamera';
+  static const String featureChatbot = 'Chatbot';
+  static const String featurePrediksiLingkungan = 'Prediksi Lingkungan';
+
+  // Water Quality
+  static const String waterClean = 'Bersih';
+  static const String waterModerate = 'Sedang';
+  static const String waterPolluted = 'Tercemar';
+  static const String cleanlinessLevel = 'Tingkat Kebersihan';
+
+  // Waste Types
+  static const String wasteOrganic = 'Organik';
+  static const String wasteInorganic = 'Anorganik';
+  static const String wastePlastic = 'Plastik';
+  static const String wasteElectronic = 'Elektronik';
+  static const String dominantWaste = 'Sampah Dominan';
+
+  // Environmental Signals
+  static const String signalEarthquake = 'Gempa';
+  static const String signalFlood = 'Banjir';
+  static const String signalLandslide = 'Longsor';
+  static const String signalVolcano = 'Gunung Meletus';
+  static const String signalExtremeWeather = 'Cuaca Ekstrem';
+  static const String levelDanger = 'Bahaya';
+  static const String levelHighWarning = 'Peringatan Tinggi';
+  static const String levelCaution = 'Waspada';
+  static const String levelSafe = 'Aman';
+  static const String levelInstruction = 'Instruksi Khusus';
+  static const String levelInfo = 'Informasi Umum';
 
   // AQI Levels
   static const String aqiGood = 'Baik';
@@ -70,11 +121,27 @@ class AppStrings {
 
   // Profile
   static const String editProfile = 'Edit Profil';
-  static const String logoutConfirm = 'Yakin ingin keluar?';
+  static const String name = 'Nama';
+  static const String username = 'Username';
+  static const String changeAvatar = 'Ganti Foto';
+  static const String removeAvatar = 'Hapus Foto';
+  static const String saveName = 'Simpan';
+  static const String profileInfoTitle = 'Informasi';
+  static const String profileInfoContent =
+      '• Username tidak dapat diubah\n'
+      '• Nama dapat diubah\n'
+      '• Logout akan mengeluarkan akun\n'
+      '• Login dapat dilakukan kembali menggunakan akun yang sama';
+  static const String logoutTitle = 'Logout';
+  static const String logoutConfirm = 'Apakah Anda yakin ingin keluar?';
+  static const String logoutButton = 'Logout';
   static const String cancel = 'Batal';
   static const String confirm = 'Konfirmasi';
   static const String yes = 'Ya';
   static const String no = 'Tidak';
+
+  static const String aboutApp = 'Tentang Aplikasi';
+  static const String signOutConfirm = logoutConfirm;
 
   // Errors
   static const String errorGeneral = 'Terjadi kesalahan. Silakan coba lagi.';

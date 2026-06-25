@@ -307,7 +307,7 @@ class _ScanContextHeader extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          scan.environmentCondition,
+                         scan.environmentCondition ?? scan.correctDisposal ?? '',
                           style: const TextStyle(
                             fontSize: 13,
                             color: AppColors.onSurface,

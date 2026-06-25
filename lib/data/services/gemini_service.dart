@@ -22,11 +22,25 @@ class GeminiService {
   Future<String> analyzeImage({
     required Uint8List imageBytes,
     String? locationContext,
+    String scanMode = 'multiple',
   }) async {
     final locationInfo =
         locationContext != null ? 'Lokasi: $locationContext. ' : '';
 
-    final prompt = '''
+    final prompt = scanMode == 'single' ? '''
+$locationInfo
+Kamu adalah ahli lingkungan hidup Indonesia yang berpengalaman dan bertindak sebagai Eco-Educator di lingkungan sekolah.
+Analisis foto sampah ini (skala kecil/sedikit/spesifik) dan berikan respons dalam format JSON berikut:
+
+{
+  "cara_buang": "Penjelasan detail dan praktis tentang cara membuang sampah yang ada di dalam foto dengan benar agar aman dan sesuai aturan sanitasi.",
+  "materi_edukasi": "Materi singkat/edukatif yang dirancang khusus untuk guru agar dapat diajarkan kepada siswa mengenai dampak sampah jenis ini di lingkungan sekolah.",
+  "pengelompokan": "Klasifikasikan sampah di foto secara spesifik (misal: organik, anorganik, B3, kertas, plastik, kaca) beserta penjelasannya.",
+  "daur_ulang": "Petunjuk praktis atau ide kreatif daur ulang (upcycling) yang dapat dilakukan oleh siswa untuk mendaur ulang sampah jenis ini."
+}
+
+Jawab dalam Bahasa Indonesia yang edukatif, ramah, dan mudah dipahami siswa sekolah.
+''' : '''
 $locationInfo
 Kamu adalah ahli lingkungan Indonesia yang berpengalaman. Analisis foto ini dan berikan respons dalam format JSON berikut:
 
@@ -134,7 +148,7 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
         Content.model([
           TextPart(
             'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
-            'Kondisi yang terdeteksi: ${scan.environmentCondition.length > 80 ? "${scan.environmentCondition.substring(0, 80)}..." : scan.environmentCondition}\n\n'
+            'Kondisi yang terdeteksi: ${(() { final ec = scan.environmentCondition ?? scan.correctDisposal ?? "kondisi lingkungan"; return ec.length > 80 ? "${ec.substring(0, 80)}..." : ec; })()}\n\n'
             'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?',
           ),
         ]),
@@ -149,6 +163,70 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
     final content = Content.text(message);
     final response = await _chatSession!.sendMessage(content);
     return response.text ?? '';
+  }
+
+  /// Generate water quality analysis for a location
+  Future<String> generateWaterQuality({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis kualitas air di wilayah $locationInfo dalam format JSON:
+{
+  "status": "Bersih/Sedang/Tercemar",
+  "cleanliness_level": 75,
+  "description": "Deskripsi singkat kondisi kualitas air"
+}
+Berikan nilai cleanliness_level dari 0-100 (100 = sangat bersih).
+Jawab hanya dengan JSON, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '{}';
+  }
+
+  /// Generate waste type analysis for a location
+  Future<String> generateWasteAnalysis({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis jenis sampah dominan di wilayah $locationInfo dalam format JSON:
+{
+  "dominant_type": "Plastik",
+  "percentage": 45,
+  "types": [
+    {"name": "Plastik", "percentage": 45, "icon": "🥤"},
+    {"name": "Organik", "percentage": 30, "icon": "🍂"},
+    {"name": "Anorganik", "percentage": 15, "icon": "🔩"},
+    {"name": "Elektronik", "percentage": 10, "icon": "📱"}
+  ]
+}
+Jawab hanya dengan JSON, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '{}';
+  }
+
+  /// Generate environmental risk signals for a location
+  Future<String> generateEnvironmentalSignals({String? location}) async {
+    final locationInfo = location ?? 'Indonesia';
+    final prompt = '''
+Berikan analisis sinyal risiko lingkungan di wilayah $locationInfo dalam format JSON array:
+[
+  {
+    "type": "Gempa/Banjir/Longsor/Gunung Meletus/Cuaca Ekstrem",
+    "level": "Aman/Waspada/Peringatan Tinggi/Bahaya",
+    "description": "Deskripsi singkat status risiko",
+    "icon": "emoji relevan"
+  }
+]
+Berikan 3-5 jenis risiko lingkungan. Level harus salah satu dari: Aman, Waspada, Peringatan Tinggi, Bahaya.
+Jawab hanya dengan JSON array, tanpa penjelasan tambahan.
+''';
+
+    final content = Content.text(prompt);
+    final response = await _model.generateContent([content]);
+    return response.text ?? '[]';
   }
 
   /// Reset chat session

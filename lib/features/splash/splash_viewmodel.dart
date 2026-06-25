@@ -7,10 +7,10 @@ class SplashViewModel extends ChangeNotifier {
   SplashViewModel({AuthRepository? authRepository})
       : _authRepository = authRepository ?? AuthRepository();
 
-  /// Check if user is already authenticated and determine the next route
+  /// Check if user is already authenticated via stored JWT token
   Future<String> getInitialRoute() async {
-    // Small delay to let Supabase restore session
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Small delay for splash animation
+    await Future.delayed(const Duration(milliseconds: 600));
 
     if (_authRepository.isAuthenticated) {
       return '/home';

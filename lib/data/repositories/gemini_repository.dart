@@ -11,10 +11,12 @@ class GeminiRepository {
   Future<String> analyzeImage({
     required Uint8List imageBytes,
     String? locationContext,
+    String scanMode = 'multiple',
   }) async {
     return _geminiService.analyzeImage(
       imageBytes: imageBytes,
       locationContext: locationContext,
+      scanMode: scanMode,
     );
   }
 
@@ -32,6 +34,18 @@ class GeminiRepository {
 
   void startChatWithScanContext(ScanResultModel scan) {
     _geminiService.startChatWithScanContext(scan);
+  }
+
+  Future<String> generateWaterQuality({String? location}) async {
+    return _geminiService.generateWaterQuality(location: location);
+  }
+
+  Future<String> generateWasteAnalysis({String? location}) async {
+    return _geminiService.generateWasteAnalysis(location: location);
+  }
+
+  Future<String> generateEnvironmentalSignals({String? location}) async {
+    return _geminiService.generateEnvironmentalSignals(location: location);
   }
 
   void resetChat() {

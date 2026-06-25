@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:eco/data/repositories/auth_repository.dart';
 import 'package:eco/data/models/user_model.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
-  StreamSubscription<AuthState>? _authStateSub;
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -44,29 +40,36 @@ class AuthViewModel extends ChangeNotifier {
     } catch (_) {
       // Google Sign-In tidak wajib — abaikan saja
     }
-  }
-
-  Future<void> _onAuthStateChanged(AuthState state) async {
-    final signedIn = state.session != null;
-    _isAuthenticated = signedIn;
-    if (signedIn) {
-      _user = await _authRepository.getUserProfile();
-      _isLoading = false;
-      _errorMessage = null;
-    } else {
-      _user = null;
-    }
     notifyListeners();
   }
 
-  /// Trigger the native Google Sign-In flow on mobile/desktop.
-  ///
-  /// On Web this is a no-op: the rendered Google button (see
-  /// `google_sign_in_button.dart`) starts the flow instead, and completion is
-  /// handled by [_onAuthStateChanged].
-  Future<void> signInWithGoogle() async {
-    if (kIsWeb) return;
+  /// Sign In menggunakan Username dan Password.
+  Future<bool> signIn(String username, String password) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
 
+    try {
+      _user = await _authRepository.signIn(username: username, password: password);
+      _isAuthenticated = true;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Register user baru.
+  Future<bool> signUp({
+    required String username,
+    required String password,
+    required String displayName,
+    String? email,
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -74,9 +77,10 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _authRepository.signInWithGoogle();
     } catch (e) {
-      _errorMessage = 'Gagal masuk: ${e.toString()}';
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
+      return false;
     }
   }
 
@@ -154,6 +158,7 @@ class AuthViewModel extends ChangeNotifier {
     try {
       await _authRepository.signOut();
       _user = null;
+      _isAuthenticated = false;
       _errorMessage = null;
     } catch (e) {
       _errorMessage = 'Gagal keluar: ${e.toString()}';
@@ -163,14 +168,13 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Load user profile
+  /// Load user profile dari server
   Future<void> loadUserProfile() async {
     try {
       _user = await _authRepository.getUserProfile();
       notifyListeners();
     } catch (e) {
-      _errorMessage = e.toString();
-      notifyListeners();
+      // Fail silently, keep existing user data
     }
   }
 
@@ -178,12 +182,5 @@ class AuthViewModel extends ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _authStateSub?.cancel();
-    _authRepository.dispose();
-    super.dispose();
   }
 }

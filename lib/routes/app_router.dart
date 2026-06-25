@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:eco/features/splash/splash_view.dart';
 import 'package:eco/features/welcome/welcome_view.dart';
 import 'package:eco/features/auth/login_view.dart';
+import 'package:eco/features/auth/register_view.dart';
 import 'package:eco/features/home/home_view.dart';
 import 'package:eco/features/profile/profile_view.dart';
 import 'package:eco/features/chatbot/chatbot_view.dart';
@@ -15,6 +16,7 @@ class AppRouter {
   static const String splash = '/splash';
   static const String welcome = '/welcome';
   static const String login = '/login';
+  static const String register = '/register';
   static const String home = '/home';
   static const String profile = '/profile';
   static const String chatbot = '/chatbot';
@@ -93,6 +95,7 @@ class AppRouter {
         splash: (context) => const SplashView(),
         welcome: (context) => const WelcomeView(),
         login: (context) => const LoginView(),
+        register: (context) => const RegisterView(),
         home: (context) => const HomeView(),
         profile: (context) => const ProfileView(),
       };

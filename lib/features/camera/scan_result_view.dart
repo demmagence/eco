@@ -40,7 +40,16 @@ class _ScanResultViewState extends State<ScanResultView>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Uint8List) {
+      if (args is Map<String, dynamic>) {
+        final bytes = args['bytes'] as Uint8List?;
+        final mode = args['mode'] as String? ?? 'multiple';
+        if (bytes != null) {
+          context.read<ScanResultViewModel>().analyzeImage(bytes, scanMode: mode).then((_) {
+            _animController.forward();
+          });
+        }
+      } else if (args is Uint8List) {
+        // Backward compatibility
         context.read<ScanResultViewModel>().analyzeImage(args).then((_) {
           _animController.forward();
         });
@@ -195,41 +204,76 @@ class _ScanResultViewState extends State<ScanResultView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Mode badge
+                _buildModeBadge(scanVM.scanType),
+                const SizedBox(height: 12),
+
                 // Section label
                 _buildSectionLabel('Hasil Analisis AI'),
                 const SizedBox(height: 12),
 
-                // Environment Condition Card
-                if (scanVM.environmentCondition?.isNotEmpty == true)
-                  _AnalysisCard(
-                    gradientColors: const [Color(0xFF1565C0), Color(0xFF5E92F3)],
-                    icon: Icons.search_rounded,
-                    title: AppStrings.environmentCondition,
-                    content: scanVM.environmentCondition!,
-                    delay: 0,
-                  ),
+                // ── SINGLE SCAN MODE CARDS ──────────────────────────────
+                if (scanVM.scanType == 'single') ...[
+                  if (scanVM.correctDisposal?.isNotEmpty == true)
+                    _AnalysisCard(
+                      gradientColors: const [Color(0xFF1B5E20), Color(0xFF43A047)],
+                      icon: Icons.delete_outline_rounded,
+                      title: 'Cara Membuang yang Benar',
+                      content: scanVM.correctDisposal!,
+                      delay: 0,
+                    ),
+                  if (scanVM.trashClassification?.isNotEmpty == true)
+                    _AnalysisCard(
+                      gradientColors: const [Color(0xFF4A148C), Color(0xFF9C27B0)],
+                      icon: Icons.category_rounded,
+                      title: 'Pengelompokan Sampah',
+                      content: scanVM.trashClassification!,
+                      delay: 60,
+                    ),
+                  if (scanVM.recyclingInfo?.isNotEmpty == true)
+                    _AnalysisCard(
+                      gradientColors: const [Color(0xFF0277BD), Color(0xFF29B6F6)],
+                      icon: Icons.recycling_rounded,
+                      title: 'Informasi Daur Ulang',
+                      content: scanVM.recyclingInfo!,
+                      delay: 120,
+                    ),
+                  if (scanVM.teacherMaterial?.isNotEmpty == true)
+                    _SuggestionsCard(
+                      content: scanVM.teacherMaterial!,
+                      title: 'Materi Edukasi untuk Guru',
+                      icon: Icons.school_rounded,
+                      gradientColors: const [Color(0xFFBF360C), Color(0xFFFF7043)],
+                    ),
+                ]
 
-                // Impact Prediction Card
-                if (scanVM.impactPrediction?.isNotEmpty == true)
-                  _AnalysisCard(
-                    gradientColors: const [Color(0xFFE65100), Color(0xFFFF9800)],
-                    icon: Icons.warning_amber_rounded,
-                    title: AppStrings.impactPrediction,
-                    content: scanVM.impactPrediction!,
-                    delay: 80,
-                  ),
-
-                // Suggestions Card
-                if (scanVM.suggestions?.isNotEmpty == true)
-                  _SuggestionsCard(
-                    content: scanVM.suggestions!,
-                  ),
-
-                // Contact Agencies
-                if (scanVM.contacts.isNotEmpty) ...[
-                  _buildSectionLabel('Instansi Terkait'),
-                  const SizedBox(height: 12),
-                  _ContactsCard(contacts: scanVM.contacts),
+                // ── MULTIPLE SCAN MODE CARDS ────────────────────────────
+                else ...[
+                  if (scanVM.environmentCondition?.isNotEmpty == true)
+                    _AnalysisCard(
+                      gradientColors: const [Color(0xFF1565C0), Color(0xFF5E92F3)],
+                      icon: Icons.search_rounded,
+                      title: AppStrings.environmentCondition,
+                      content: scanVM.environmentCondition!,
+                      delay: 0,
+                    ),
+                  if (scanVM.impactPrediction?.isNotEmpty == true)
+                    _AnalysisCard(
+                      gradientColors: const [Color(0xFFE65100), Color(0xFFFF9800)],
+                      icon: Icons.warning_amber_rounded,
+                      title: AppStrings.impactPrediction,
+                      content: scanVM.impactPrediction!,
+                      delay: 80,
+                    ),
+                  if (scanVM.suggestions?.isNotEmpty == true)
+                    _SuggestionsCard(
+                      content: scanVM.suggestions!,
+                    ),
+                  if (scanVM.contacts.isNotEmpty) ...[
+                    _buildSectionLabel('Instansi Terkait'),
+                    const SizedBox(height: 12),
+                    _ContactsCard(contacts: scanVM.contacts),
+                  ],
                 ],
 
                 const SizedBox(height: 16),
@@ -326,6 +370,42 @@ class _ScanResultViewState extends State<ScanResultView>
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildModeBadge(String scanType) {
+    final isSingle = scanType == 'single';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isSingle
+              ? [const Color(0xFF1B5E20), const Color(0xFF43A047)]
+              : [const Color(0xFF1565C0), const Color(0xFF5E92F3)],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isSingle ? Icons.eco_rounded : Icons.search_rounded,
+            color: Colors.white,
+            size: 14,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            isSingle ? 'Scan Single — Edukasi Sampah' : 'Scan Multiple — Analisis Lingkungan',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -637,8 +717,16 @@ class _AnalysisCard extends StatelessWidget {
 
 class _SuggestionsCard extends StatelessWidget {
   final String content;
+  final String title;
+  final IconData icon;
+  final List<Color> gradientColors;
 
-  const _SuggestionsCard({required this.content});
+  const _SuggestionsCard({
+    required this.content,
+    this.title = AppStrings.suggestions,
+    this.icon = Icons.lightbulb_rounded,
+    this.gradientColors = const [Color(0xFF2E7D32), Color(0xFF60AD5E)],
+  });
 
   List<String> _parseBullets(String text) {
     // Split by newlines or numbered list patterns
@@ -674,13 +762,13 @@ class _SuggestionsCard extends StatelessWidget {
           // Header strip
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF2E7D32), Color(0xFF60AD5E)],
+                colors: gradientColors,
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: Row(
               children: [
@@ -690,12 +778,12 @@ class _SuggestionsCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.lightbulb_rounded, color: Colors.white, size: 18),
+                  child: Icon(icon, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 10),
-                const Text(
-                  AppStrings.suggestions,
-                  style: TextStyle(
+                Text(
+                  title,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

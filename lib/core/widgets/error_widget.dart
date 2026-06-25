@@ -5,46 +5,52 @@ import 'package:eco/core/constants/app_strings.dart';
 class AppErrorWidget extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
-  final IconData icon;
 
   const AppErrorWidget({
     super.key,
-    this.message = AppStrings.errorGeneral,
+    required this.message,
     this.onRetry,
-    this.icon = Icons.error_outline,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(32),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 64,
-              color: AppColors.error.withValues(alpha: 0.7),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                color: AppColors.error,
+                size: 48,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
               message,
               style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.onSurfaceVariant,
+                color: AppColors.textSecondary,
+                fontSize: 14,
               ),
               textAlign: TextAlign.center,
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 24),
-              OutlinedButton.icon(
+              ElevatedButton.icon(
                 onPressed: onRetry,
-                icon: const Icon(Icons.refresh),
+                icon: const Icon(Icons.refresh, size: 18),
                 label: const Text(AppStrings.retry),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: AppColors.backgroundPrimary,
+                  minimumSize: const Size(160, 44),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
