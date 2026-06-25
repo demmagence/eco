@@ -4,7 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/data/models/user_model.dart';
 
-/// Custom AppBar for the Dashboard: left = clock + city, right = avatar + name + @username.
+/// Custom AppBar for the Dashboard — Light Mode
+/// Left = clock + city, Right = avatar + name + @username.
 class DashboardAppBar extends StatelessWidget {
   final String currentTime;
   final String cityName;
@@ -40,7 +41,7 @@ class DashboardAppBar extends StatelessWidget {
                 Text(
                   currentTime,
                   style: const TextStyle(
-                    color: AppColors.textSecondary,
+                    color: AppColors.lightTextMuted,
                     fontSize: 13,
                     fontWeight: FontWeight.w400,
                   ),
@@ -49,18 +50,19 @@ class DashboardAppBar extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.location_on,
-                      color: AppColors.accent,
+                      color: AppColors.lightAccentEmerald,
                       size: 16,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       cityName.isNotEmpty ? cityName : 'Lokasi',
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: AppColors.lightDarkEmerald,
                         fontSize: 17,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.3,
                       ),
                     ),
                   ],
@@ -85,7 +87,7 @@ class DashboardAppBar extends StatelessWidget {
                       Text(
                         user!.displayName,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: AppColors.lightDarkEmerald,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -94,7 +96,7 @@ class DashboardAppBar extends StatelessWidget {
                       Text(
                         user!.formattedUsername!,
                         style: const TextStyle(
-                          color: AppColors.textMuted,
+                          color: AppColors.lightTextMuted,
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                         ),
@@ -104,7 +106,7 @@ class DashboardAppBar extends StatelessWidget {
                       Text(
                         user!.email,
                         style: const TextStyle(
-                          color: AppColors.textMuted,
+                          color: AppColors.lightTextMuted,
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                         ),
@@ -121,12 +123,12 @@ class DashboardAppBar extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColors.accent.withValues(alpha: 0.5),
+                        color: AppColors.lightBorder,
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.accent.withValues(alpha: 0.2),
+                          color: AppColors.lightShadow,
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),
@@ -157,10 +159,10 @@ class DashboardAppBar extends StatelessWidget {
     return Container(
       width: 44,
       height: 44,
-      color: AppColors.primaryEmerald,
+      color: AppColors.lightAccentEmerald.withValues(alpha: 0.1),
       child: const Icon(
         Icons.person,
-        color: AppColors.accent,
+        color: AppColors.lightPrimaryEmerald,
         size: 24,
       ),
     );

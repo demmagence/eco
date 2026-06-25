@@ -140,6 +140,9 @@ class AppStrings {
   static const String yes = 'Ya';
   static const String no = 'Tidak';
 
+  static const String aboutApp = 'Tentang Aplikasi';
+  static const String signOutConfirm = logoutConfirm;
+
   // Errors
   static const String errorGeneral = 'Terjadi kesalahan. Silakan coba lagi.';
   static const String errorNetwork = 'Tidak ada koneksi internet.';

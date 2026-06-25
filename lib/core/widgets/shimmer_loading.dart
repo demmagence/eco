@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:eco/core/constants/app_colors.dart';
 
-/// Shimmer / skeleton loading widgets for the dark glassmorphism theme.
+/// Shimmer / skeleton loading widgets for the light glassmorphism theme.
 class ShimmerLoading extends StatelessWidget {
   final Widget child;
 
@@ -11,8 +11,8 @@ class ShimmerLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.primaryEmerald.withValues(alpha: 0.3),
-      highlightColor: AppColors.secondaryEmerald.withValues(alpha: 0.5),
+      baseColor: AppColors.lightBorder,
+      highlightColor: Colors.white,
       child: child,
     );
   }
@@ -38,7 +38,7 @@ class ShimmerBox extends StatelessWidget {
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.primaryEmerald,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),
@@ -58,8 +58,8 @@ class ShimmerCircle extends StatelessWidget {
       child: Container(
         width: size,
         height: size,
-        decoration: BoxDecoration(
-          color: AppColors.primaryEmerald,
+        decoration: const BoxDecoration(
+          color: Colors.white,
           shape: BoxShape.circle,
         ),
       ),
@@ -79,7 +79,7 @@ class ShimmerCard extends StatelessWidget {
       child: Container(
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.primaryEmerald,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
         ),
       ),
@@ -133,11 +133,11 @@ class DashboardShimmer extends StatelessWidget {
           // Category chips
           Row(
             children: const [
-              ShimmerBox(width: 70, height: 36),
+              ShimmerBox(width: 70, height: 36, borderRadius: 20),
               SizedBox(width: 10),
-              ShimmerBox(width: 80, height: 36),
+              ShimmerBox(width: 80, height: 36, borderRadius: 20),
               SizedBox(width: 10),
-              ShimmerBox(width: 80, height: 36),
+              ShimmerBox(width: 80, height: 36, borderRadius: 20),
             ],
           ),
           const SizedBox(height: 24),

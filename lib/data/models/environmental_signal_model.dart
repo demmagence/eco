@@ -6,12 +6,16 @@ class EnvironmentalSignalModel {
   final String level; // Bahaya, Peringatan Tinggi, Waspada, Aman, etc.
   final String description;
   final String icon;
+  final String recommendation;
+  final String effectiveTime;
 
   const EnvironmentalSignalModel({
     required this.type,
     required this.level,
     required this.description,
     this.icon = '⚠️',
+    this.recommendation = '',
+    this.effectiveTime = '',
   });
 
   factory EnvironmentalSignalModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class EnvironmentalSignalModel {
       level: json['level'] as String? ?? 'Aman',
       description: json['description'] as String? ?? '',
       icon: json['icon'] as String? ?? '⚠️',
+      recommendation: json['recommendation'] as String? ?? '',
+      effectiveTime: json['effective_time'] as String? ?? '',
     );
   }
 

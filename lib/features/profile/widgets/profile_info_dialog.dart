@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/core/constants/app_strings.dart';
@@ -8,100 +7,83 @@ class ProfileInfoDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-      child: AlertDialog(
-        backgroundColor: AppColors.backgroundSecondary.withValues(alpha: 0.85),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: BorderSide(
-            color: AppColors.glassBorder,
-            width: 1,
-          ),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadow,
+              blurRadius: 24,
+              offset: Offset(0, 8),
+            ),
+          ],
         ),
-        title: Row(
-          children: const [
-            Icon(Icons.info_outline, color: AppColors.accent),
-            SizedBox(width: 8),
-            Text(
-              AppStrings.profileInfoTitle,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.info.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.info_outline,
+                color: AppColors.info,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              AppStrings.aboutApp,
               style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Aplikasi ini merupakan purwarupa untuk memantau kualitas lingkungan sekitar. Fitur scan hanya memberikan simulasi deteksi berdasarkan database lokal.',
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 14,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.info,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text(
+                  'Mengerti',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            _InfoRow(
-              icon: Icons.alternate_email,
-              text: 'Username tidak dapat diubah setelah registrasi.',
-            ),
-            SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.edit_outlined,
-              text: 'Nama tampilan dapat disesuaikan sesuka Anda.',
-            ),
-            SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.logout,
-              text: 'Keluar akan menghapus sesi login aktif Anda.',
-            ),
-            SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.login,
-              text: 'Anda dapat masuk kembali kapan saja dengan akun Google.',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.accent,
-            ),
-            child: const Text(
-              AppStrings.confirm,
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _InfoRow({required this.icon, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          color: AppColors.accent.withValues(alpha: 0.7),
-          size: 18,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-              height: 1.4,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
