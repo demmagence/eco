@@ -90,8 +90,6 @@ class AuthViewModel extends ChangeNotifier {
       _user = await _authRepository.signInWithEmailPassword(
         email: email,
         password: password,
-        displayName: displayName,
-        email: email,
       );
       _isAuthenticated = true;
       _isLoading = false;
