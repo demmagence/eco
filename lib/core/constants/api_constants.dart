@@ -7,7 +7,7 @@ class ApiConstants {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1cGhoZGpzenJtcmFnYXhsdHhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM2NzQsImV4cCI6MjA5Nzc2OTY3NH0.x3dS5tNomEfJF1x0ul9kpugf5bENzf2NSksE-CeVZRQ';
 
   // Gemini AI (image analysis, daily tip, news)
-  static const String geminiApiKey = 'AQ.Ab8RN6L5Cco91BLpu75s2pn59PZAzB_vB6FymagGA8qxnPCgwA';
+  static const String geminiApiKey = 'AQ.Ab8RN6Jn4zscvMYBUc2iz9KnPiruFKWbTzFaThDcahwoSTlDYw';
   static const String geminiModel = 'gemini-3.5-flash';
 
   // Groq AI (Eco Assistant chatbot) — OpenAI-compatible chat completions
