@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
+  // Forest gradient — khusus Splash & Welcome
+  static const Color forestNight = Color(0xFF06241B);
+  static const Color emerald = Color(0xFF0F4D3A);
+
+  static const LinearGradient welcomeGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [forestNight, emerald],
+  );
+
   // Primary Colors
   static const Color primary = Color(0xFF2E7D32);
   static const Color primaryLight = Color(0xFF60AD5E);
