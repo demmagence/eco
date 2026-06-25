@@ -27,18 +27,9 @@ class AuthViewModel extends ChangeNotifier {
   /// booted via `main()` — keeping the constructor side-effect-free lets the
   /// widget test build the view model without a live Supabase instance.
   Future<void> initialize() async {
-    // Selalu pasang listener auth state Supabase — dibutuhkan untuk email/password
-    // maupun Google Sign-In flow.
     _isAuthenticated = _authRepository.isAuthenticated;
-    _authStateSub ??=
-        _authRepository.authStateChanges.listen(_onAuthStateChanged);
-
-    // Google Sign-In init hanya dibutuhkan kalau pakai Google auth.
-    // Error-nya diabaikan supaya tidak muncul di form login email/password.
-    try {
-      await _authRepository.ensureInitialized();
-    } catch (_) {
-      // Google Sign-In tidak wajib — abaikan saja
+    if (_isAuthenticated) {
+      _user = _authRepository.currentUser;
     }
     notifyListeners();
   }
@@ -65,9 +56,9 @@ class AuthViewModel extends ChangeNotifier {
 
   /// Register user baru.
   Future<bool> signUp({
-    required String username,
     required String password,
-    required String displayName,
+    String? username,
+    String? displayName,
     String? email,
   }) async {
     _isLoading = true;
@@ -75,7 +66,16 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authRepository.signInWithGoogle();
+      _user = await _authRepository.signUp(
+        password: password,
+        username: username,
+        displayName: displayName,
+        email: email,
+      );
+      _isAuthenticated = true;
+      _isLoading = false;
+      notifyListeners();
+      return true;
     } catch (e) {
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
@@ -84,8 +84,8 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Login dengan email + password via Supabase
-  Future<void> signInWithEmailPassword({
+  /// Login dengan email + password via API
+  Future<bool> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
@@ -94,61 +94,22 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _authRepository.signInWithEmailPassword(
+      _user = await _authRepository.signInWithEmailPassword(
         email: email,
         password: password,
       );
-      // Sukses → auth state listener (_onAuthStateChanged) akan update status
-    } catch (e) {
-      _errorMessage = _friendlyError(e.toString());
+      _isAuthenticated = true;
       _isLoading = false;
       notifyListeners();
-    }
-  }
-
-  /// Daftar akun baru dengan email + password
-  Future<void> signUp({
-    required String email,
-    required String password,
-    String? displayName,
-  }) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await _authRepository.signUp(
-        email: email,
-        password: password,
-        displayName: displayName,
-      );
+      return true;
     } catch (e) {
-      _errorMessage = _friendlyError(e.toString());
+      _errorMessage = e.toString().replaceFirst('Exception: ', '');
       _isLoading = false;
       notifyListeners();
+      return false;
     }
   }
 
-  /// Terjemahkan error Supabase ke pesan yang ramah pengguna
-  String _friendlyError(String raw) {
-    if (raw.contains('Invalid login credentials') ||
-        raw.contains('invalid_credentials')) {
-      return 'Email atau password salah. Coba lagi.';
-    }
-    if (raw.contains('Email not confirmed')) {
-      return 'Email belum dikonfirmasi. Cek inbox kamu.';
-    }
-    if (raw.contains('User already registered')) {
-      return 'Email sudah terdaftar. Coba masuk.';
-    }
-    if (raw.contains('Password should be at least')) {
-      return 'Password minimal 6 karakter.';
-    }
-    if (raw.contains('Unable to validate email')) {
-      return 'Format email tidak valid.';
-    }
-    return 'Terjadi kesalahan. Coba lagi.';
-  }
 
   /// Sign out
   Future<void> signOut() async {

@@ -22,17 +22,28 @@ class AuthRepository {
     return UserModel.fromJson(userData);
   }
 
-  /// Registrasi user baru dengan username dan password.
+  /// Registrasi user baru.
   Future<UserModel> signUp({
-    required String username,
     required String password,
-    required String displayName,
+    String? username,
+    String? displayName,
     String? email,
   }) async {
+    final finalUsername = (username != null && username.isNotEmpty)
+        ? username
+        : (email != null && email.isNotEmpty)
+            ? email
+            : '';
+    final finalDisplayName = (displayName != null && displayName.isNotEmpty)
+        ? displayName
+        : (email != null && email.contains('@'))
+            ? email.split('@')[0]
+            : finalUsername;
+
     final response = await ApiService.post('/auth/register', {
-      'username': username,
+      'username': finalUsername,
       'password': password,
-      'display_name': displayName,
+      'display_name': finalDisplayName,
       if (email != null && email.isNotEmpty) 'email': email,
     });
 
@@ -48,32 +59,15 @@ class AuthRepository {
 
   /// Trigger the native Google Sign-In flow (mobile/desktop only).
   Future<void> signInWithGoogle() async {
-    await ensureInitialized();
-    await _googleSignIn.authenticate();
+    throw UnimplementedError('Google Sign-In is not implemented.');
   }
 
-  /// Sign in dengan email + password via Supabase
-  Future<void> signInWithEmailPassword({
+  /// Sign in dengan email + password via API
+  Future<UserModel> signInWithEmailPassword({
     required String email,
     required String password,
   }) async {
-    await SupabaseService.auth.signInWithPassword(
-      email: email.trim(),
-      password: password,
-    );
-  }
-
-  /// Daftar akun baru dengan email + password via Supabase
-  Future<void> signUp({
-    required String email,
-    required String password,
-    String? displayName,
-  }) async {
-    await SupabaseService.auth.signUp(
-      email: email.trim(),
-      password: password,
-      data: displayName != null ? {'display_name': displayName} : null,
-    );
+    return signIn(username: email, password: password);
   }
 
   /// Sign out
