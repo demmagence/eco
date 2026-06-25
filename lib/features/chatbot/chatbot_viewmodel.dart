@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:eco/data/models/chat_message_model.dart';
 import 'package:eco/data/models/chat_session_model.dart';
-import 'package:eco/data/repositories/gemini_repository.dart';
+import 'package:eco/data/repositories/groq_repository.dart';
 import 'package:eco/data/repositories/chat_repository.dart';
 import 'package:eco/core/constants/app_strings.dart';
 import 'package:uuid/uuid.dart';
@@ -10,7 +10,7 @@ import 'package:eco/data/models/chatbot_args.dart';
 import 'package:eco/data/models/scan_result_model.dart';
 
 class ChatbotViewModel extends ChangeNotifier {
-  final GeminiRepository _geminiRepository;
+  final GroqRepository _groqRepository;
   final ChatRepository _chatRepository;
   final _uuid = const Uuid();
 
@@ -25,10 +25,10 @@ class ChatbotViewModel extends ChangeNotifier {
   Uint8List? _localImageBytes;
 
   ChatbotViewModel({
-    GeminiRepository? geminiRepository,
+    GroqRepository? groqRepository,
     ChatRepository? chatRepository,
     ChatbotArgs? args,
-  })  : _geminiRepository = geminiRepository ?? GeminiRepository(),
+  })  : _groqRepository = groqRepository ?? GroqRepository(),
         _chatRepository = chatRepository ?? ChatRepository() {
     if (args != null) {
       if (args.sessionId != null) {
@@ -57,7 +57,7 @@ class ChatbotViewModel extends ChangeNotifier {
     try {
       _session = await _chatRepository.createSession();
       _messages = [];
-      _geminiRepository.resetChat();
+      _groqRepository.resetChat();
 
       // Add welcome message
       final welcomeMsg = ChatMessageModel(
@@ -84,8 +84,8 @@ class ChatbotViewModel extends ChangeNotifier {
       _session = await _chatRepository.createSession();
       _messages = [];
       
-      // Initialize Gemini with the scan context
-      _geminiRepository.startChatWithScanContext(scan);
+      // Initialize the chatbot with the scan context
+      _groqRepository.startChatWithScanContext(scan);
 
       // Add the context greeting from Eco Assistant to the message list and save it
       final greetingText = 'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
@@ -165,7 +165,7 @@ class ChatbotViewModel extends ChangeNotifier {
 
     // Get AI response
     try {
-      final response = await _geminiRepository.sendChatMessage(text);
+      final response = await _groqRepository.sendChatMessage(text);
 
       final aiMsg = ChatMessageModel(
         id: _uuid.v4(),

@@ -50,14 +50,14 @@ lib/
 - DB columns are snake_case; Dart models are camelCase — conversion lives in each model's `fromJson`/`toJson`. Use `toInsertJson()` (omits `id`, lets Postgres generate it) for inserts.
 - Auth is Google Sign-In → Supabase `signInWithIdToken`. `AuthRepository` merges the auth email into the profile row.
 
-### AI (Gemini) — JSON-over-text contract
-- `GeminiService` builds Indonesian prompts that instruct Gemini to reply as **JSON** (image analysis, daily tip, news) or plain text (chat). Model id and keys come from `ApiConstants`.
-- Gemini often wraps JSON in markdown ```` ```json ```` fences. Every consumer therefore runs an `_extractJson()` regex helper before `jsonDecode`, wrapped in try/catch that **falls back to using the raw text** on parse failure. This duplicated helper appears in `DashboardViewModel` and `ScanResultViewModel` — match that resilient pattern for any new Gemini-parsing code; never assume the response is clean JSON.
-- Chat keeps a stateful `ChatSession` inside `GeminiService` seeded with an Eco Assistant system persona; `resetChat()` clears it.
+### AI — two providers
+The app uses **two** AI backends, split by feature:
+- **Gemini** (`GeminiService` / `GeminiRepository`) handles the vision/structured tasks: image analysis, daily tip, news. These build Indonesian prompts that instruct Gemini to reply as **JSON**. Gemini often wraps JSON in markdown ```` ```json ```` fences, so every consumer runs an `_extractJson()` regex helper before `jsonDecode`, wrapped in try/catch that **falls back to using the raw text** on parse failure. This duplicated helper appears in `DashboardViewModel` and `ScanResultViewModel` — match that resilient pattern for any new Gemini-parsing code; never assume the response is clean JSON.
+- **Groq** (`GroqService` / `GroqRepository`) powers the Eco Assistant **chatbot** via Groq's OpenAI-compatible Chat Completions endpoint (`groqModel` in `ApiConstants`, currently `openai/gpt-oss-120b`). Groq has no stateful session like Gemini's `ChatSession`, so `GroqService` keeps the conversation itself as a `List<{role, content}>` and resends it each turn. `startChat()` / `startChatWithScanContext(scan)` seed the Eco Assistant persona (optionally with a scan analysis as context); `resetChat()` clears history. The model's `message.content` is the answer; the `message.reasoning` field (gpt-oss is a reasoning model) is ignored. `ChatbotViewModel` depends on `GroqRepository`; the Gemini chat methods remain but are no longer wired to the chatbot.
 
 ### Scan pipeline (core feature)
 Camera capture → `ScanResultViewModel.analyzeImage(bytes)`: fetch location context → `GeminiRepository.analyzeImage` → parse JSON into condition/impact/suggestions/contacts. Then `saveResult()`: upload bytes to the `scan-images` bucket → build `ScanResultModel` → `ScanRepository.saveScanResult`. History reuses the same ViewModel via `loadExistingResult()`.
 
 ## Secrets / configuration
 
-`lib/core/constants/api_constants.dart` currently holds **live** Supabase, Gemini, and OpenWeatherMap keys committed to the repo (intentional, for collaborators — see commit history). The Google Maps key is still a `YOUR_..._KEY` placeholder. This file is the single source of truth for all endpoints and credentials.
+`lib/core/constants/api_constants.dart` currently holds **live** Supabase, Gemini, Groq, and OpenWeatherMap keys committed to the repo (intentional, for collaborators — see commit history). The Google Maps key is still a `YOUR_..._KEY` placeholder. This file is the single source of truth for all endpoints and credentials.
