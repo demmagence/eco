@@ -53,14 +53,33 @@ class AuthRepository {
   }
 
   /// Trigger the native Google Sign-In flow (mobile/desktop only).
-  ///
-  /// On Web this is unsupported — `authenticate()` throws
-  /// `UnimplementedError`. Render the Google button instead (see
-  /// `features/auth/google_sign_in_button.dart`); the button emits the same
-  /// authentication event that [_handleAuthenticationEvent] consumes.
   Future<void> signInWithGoogle() async {
     await ensureInitialized();
     await _googleSignIn.authenticate();
+  }
+
+  /// Sign in dengan email + password via Supabase
+  Future<void> signInWithEmailPassword({
+    required String email,
+    required String password,
+  }) async {
+    await SupabaseService.auth.signInWithPassword(
+      email: email.trim(),
+      password: password,
+    );
+  }
+
+  /// Daftar akun baru dengan email + password via Supabase
+  Future<void> signUp({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    await SupabaseService.auth.signUp(
+      email: email.trim(),
+      password: password,
+      data: displayName != null ? {'display_name': displayName} : null,
+    );
   }
 
   /// Sign out

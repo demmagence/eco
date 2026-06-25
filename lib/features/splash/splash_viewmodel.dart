@@ -15,6 +15,6 @@ class SplashViewModel extends ChangeNotifier {
     if (_authRepository.isAuthenticated) {
       return '/home';
     }
-    return '/login';
+    return '/welcome'; // 🔧 sebelumnya '/login'
   }
 }
