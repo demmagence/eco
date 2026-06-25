@@ -116,27 +116,19 @@ const uploadScan = multer({ storage: scanStorage });
 // ── AUTH ENDPOINTS ────────────────────────
 // ==========================================
 
-// 1. Register Student
+// 1. Register User (Username & Password)
 app.post('/api/auth/register', checkDb, async (req, res) => {
-  const { nis, password, display_name, username, email } = req.body;
+  const { username, password, display_name, email } = req.body;
 
-  if (!nis || !password || !display_name) {
-    return res.status(400).json({ error: 'NIS, Password, dan Nama Lengkap wajib diisi.' });
+  if (!username || !password || !display_name) {
+    return res.status(400).json({ error: 'Username, Password, dan Nama Lengkap wajib diisi.' });
   }
 
   try {
-    // Check if NIS already exists
-    const [existingNis] = await pool.query('SELECT id FROM users WHERE nis = ?', [nis]);
-    if (existingNis.length > 0) {
-      return res.status(400).json({ error: 'NIS sudah terdaftar.' });
-    }
-
     // Check if username already exists
-    if (username) {
-      const [existingUsername] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
-      if (existingUsername.length > 0) {
-        return res.status(400).json({ error: 'Username sudah digunakan.' });
-      }
+    const [existingUsername] = await pool.query('SELECT id FROM users WHERE username = ?', [username]);
+    if (existingUsername.length > 0) {
+      return res.status(400).json({ error: 'Username sudah terdaftar.' });
     }
 
     // Hash password
@@ -147,30 +139,28 @@ app.post('/api/auth/register', checkDb, async (req, res) => {
     const userId = uuidv4();
     const newUser = {
       id: userId,
-      nis,
+      username,
       password: hashedPassword,
       display_name,
-      username: username || null,
       email: email || null,
       photo_url: null,
       created_at: new Date()
     };
 
     await pool.query(
-      'INSERT INTO users (id, nis, password, display_name, username, email, photo_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [newUser.id, newUser.nis, newUser.password, newUser.display_name, newUser.username, newUser.email, newUser.photo_url, newUser.created_at]
+      'INSERT INTO users (id, username, password, display_name, email, photo_url, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [newUser.id, newUser.username, newUser.password, newUser.display_name, newUser.email, newUser.photo_url, newUser.created_at]
     );
 
     // Generate token
-    const token = jwt.sign({ id: newUser.id, nis: newUser.nis }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: newUser.id, username: newUser.username }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({
       token,
       user: {
         id: newUser.id,
-        nis: newUser.nis,
-        display_name: newUser.display_name,
         username: newUser.username,
+        display_name: newUser.display_name,
         email: newUser.email,
         photo_url: newUser.photo_url,
         created_at: newUser.created_at
@@ -183,19 +173,19 @@ app.post('/api/auth/register', checkDb, async (req, res) => {
   }
 });
 
-// 2. Login Student (NIS & Password)
+// 2. Login User (Username & Password)
 app.post('/api/auth/login', checkDb, async (req, res) => {
-  const { nis, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!nis || !password) {
-    return res.status(400).json({ error: 'NIS dan Password wajib diisi.' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username dan Password wajib diisi.' });
   }
 
   try {
-    // Find user by NIS
-    const [users] = await pool.query('SELECT * FROM users WHERE nis = ?', [nis]);
+    // Find user by username
+    const [users] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
     if (users.length === 0) {
-      return res.status(400).json({ error: 'NIS atau password salah.' });
+      return res.status(400).json({ error: 'Username atau password salah.' });
     }
 
     const user = users[0];
@@ -203,19 +193,18 @@ app.post('/api/auth/login', checkDb, async (req, res) => {
     // Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ error: 'NIS atau password salah.' });
+      return res.status(400).json({ error: 'Username atau password salah.' });
     }
 
     // Generate token
-    const token = jwt.sign({ id: user.id, nis: user.nis }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '7d' });
 
     res.json({
       token,
       user: {
         id: user.id,
-        nis: user.nis,
-        display_name: user.display_name,
         username: user.username,
+        display_name: user.display_name,
         email: user.email,
         photo_url: user.photo_url,
         created_at: user.created_at
@@ -235,7 +224,7 @@ app.post('/api/auth/login', checkDb, async (req, res) => {
 // Get current profile
 app.get('/api/profile', checkDb, authenticateToken, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, nis, display_name, username, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, username, display_name, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ error: 'Profil tidak ditemukan.' });
     }
@@ -255,7 +244,7 @@ app.put('/api/profile', checkDb, authenticateToken, async (req, res) => {
   try {
     await pool.query('UPDATE users SET display_name = ? WHERE id = ?', [display_name, req.user.id]);
     
-    const [users] = await pool.query('SELECT id, nis, display_name, username, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, username, display_name, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
     res.json(users[0]);
   } catch (error) {
     res.status(500).json({ error: 'Gagal memperbarui profil.' });
@@ -282,7 +271,7 @@ app.post('/api/profile/avatar', checkDb, authenticateToken, uploadAvatar.single(
     const relativePath = `uploads/avatars/${req.file.filename}`;
     await pool.query('UPDATE users SET photo_url = ? WHERE id = ?', [relativePath, req.user.id]);
 
-    const [updatedUser] = await pool.query('SELECT id, nis, display_name, username, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [updatedUser] = await pool.query('SELECT id, username, display_name, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
     res.json(updatedUser[0]);
   } catch (error) {
     res.status(500).json({ error: 'Gagal mengunggah foto profil.' });
@@ -302,7 +291,7 @@ app.delete('/api/profile/avatar', checkDb, authenticateToken, async (req, res) =
 
     await pool.query('UPDATE users SET photo_url = NULL WHERE id = ?', [req.user.id]);
     
-    const [updatedUser] = await pool.query('SELECT id, nis, display_name, username, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
+    const [updatedUser] = await pool.query('SELECT id, username, display_name, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
     res.json(updatedUser[0]);
   } catch (error) {
     res.status(500).json({ error: 'Gagal menghapus foto profil.' });

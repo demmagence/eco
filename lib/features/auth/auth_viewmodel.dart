@@ -28,14 +28,14 @@ class AuthViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sign In menggunakan NIS dan Password.
-  Future<bool> signIn(String nis, String password) async {
+  /// Sign In menggunakan Username dan Password.
+  Future<bool> signIn(String username, String password) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _user = await _authRepository.signIn(nis: nis, password: password);
+      _user = await _authRepository.signIn(username: username, password: password);
       _isAuthenticated = true;
       _isLoading = false;
       notifyListeners();
@@ -48,12 +48,11 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
-  /// Register siswa baru.
+  /// Register user baru.
   Future<bool> signUp({
-    required String nis,
+    required String username,
     required String password,
     required String displayName,
-    String? username,
     String? email,
   }) async {
     _isLoading = true;
@@ -62,10 +61,9 @@ class AuthViewModel extends ChangeNotifier {
 
     try {
       _user = await _authRepository.signUp(
-        nis: nis,
+        username: username,
         password: password,
         displayName: displayName,
-        username: username,
         email: email,
       );
       _isAuthenticated = true;

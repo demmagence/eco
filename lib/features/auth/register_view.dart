@@ -13,7 +13,6 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _nisController = TextEditingController();
   final _nameController = TextEditingController();
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -38,7 +37,6 @@ class _RegisterViewState extends State<RegisterView>
 
   @override
   void dispose() {
-    _nisController.dispose();
     _nameController.dispose();
     _usernameController.dispose();
     _emailController.dispose();
@@ -53,12 +51,9 @@ class _RegisterViewState extends State<RegisterView>
     FocusScope.of(context).unfocus();
 
     final success = await authVM.signUp(
-      nis: _nisController.text.trim(),
+      username: _usernameController.text.trim(),
       password: _passwordController.text,
       displayName: _nameController.text.trim(),
-      username: _usernameController.text.trim().isEmpty
-          ? null
-          : _usernameController.text.trim(),
       email: _emailController.text.trim().isEmpty
           ? null
           : _emailController.text.trim(),
@@ -126,7 +121,7 @@ class _RegisterViewState extends State<RegisterView>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Daftarkan NIS Anda untuk mulai menggunakan VibEco',
+                        'Daftarkan akun Anda untuk mulai menggunakan VibEco',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.white.withValues(alpha: 0.7),
@@ -150,21 +145,6 @@ class _RegisterViewState extends State<RegisterView>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              // NIS
-                              _buildTextField(
-                                controller: _nisController,
-                                label: 'NIS (Nomor Induk Siswa) *',
-                                icon: Icons.badge_outlined,
-                                keyboardType: TextInputType.number,
-                                validator: (v) {
-                                  if (v == null || v.trim().isEmpty) {
-                                    return 'NIS wajib diisi';
-                                  }
-                                  return null;
-                                },
-                              ),
-                              const SizedBox(height: 14),
-
                               // Full Name
                               _buildTextField(
                                 controller: _nameController,
@@ -179,11 +159,20 @@ class _RegisterViewState extends State<RegisterView>
                               ),
                               const SizedBox(height: 14),
 
-                              // Username (Optional)
+                              // Username
                               _buildTextField(
                                 controller: _usernameController,
-                                label: 'Username (opsional)',
+                                label: 'Username *',
                                 icon: Icons.alternate_email,
+                                validator: (v) {
+                                  if (v == null || v.trim().isEmpty) {
+                                    return 'Username wajib diisi';
+                                  }
+                                  if (v.trim().length < 3) {
+                                    return 'Username minimal 3 karakter';
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 14),
 

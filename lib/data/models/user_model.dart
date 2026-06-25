@@ -1,18 +1,16 @@
 class UserModel {
   final String id;
-  final String nis;
+  final String username;
   final String email;
   final String displayName;
-  final String? username;
   final String? photoUrl;
   final DateTime createdAt;
 
   const UserModel({
     required this.id,
-    required this.nis,
+    required this.username,
     required this.email,
     required this.displayName,
-    this.username,
     this.photoUrl,
     required this.createdAt,
   });
@@ -20,10 +18,9 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
-      nis: json['nis'] as String? ?? '',
+      username: json['username'] as String? ?? '',
       email: json['email'] as String? ?? '',
       displayName: json['display_name'] as String? ?? '',
-      username: json['username'] as String?,
       photoUrl: json['photo_url'] as String?,
       createdAt: _parseDate(json['created_at']),
     );
@@ -38,10 +35,9 @@ class UserModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'nis': nis,
+      'username': username,
       'email': email,
       'display_name': displayName,
-      'username': username,
       'photo_url': photoUrl,
       'created_at': createdAt.toIso8601String(),
     };
@@ -49,35 +45,31 @@ class UserModel {
 
   UserModel copyWith({
     String? id,
-    String? nis,
+    String? username,
     String? email,
     String? displayName,
-    String? username,
     String? photoUrl,
     bool clearPhotoUrl = false,
     DateTime? createdAt,
   }) {
     return UserModel(
       id: id ?? this.id,
-      nis: nis ?? this.nis,
+      username: username ?? this.username,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
-      username: username ?? this.username,
       photoUrl: clearPhotoUrl ? null : (photoUrl ?? this.photoUrl),
       createdAt: createdAt ?? this.createdAt,
     );
   }
 
-  /// Display string: if display name is empty, show username or NIS
+  /// Display string: if display name is empty, show username
   String get displayLabel {
     if (displayName.isNotEmpty) return displayName;
-    if (username != null && username!.isNotEmpty) return '@$username';
-    return 'NIS: $nis';
+    return '@$username';
   }
 
   /// Formatted @username
-  String? get formattedUsername {
-    if (username == null || username!.isEmpty) return null;
+  String get formattedUsername {
     return '@$username';
   }
 }
