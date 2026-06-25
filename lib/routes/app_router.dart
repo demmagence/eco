@@ -64,6 +64,8 @@ class AppRouter {
         return const WelcomeView();
       case login:
         return const LoginView();
+      case register:
+        return const RegisterView();
       case home:
         return const HomeView();
       case profile:

@@ -46,36 +46,6 @@ class AuthRepository {
     return UserModel.fromJson(userData);
   }
 
-  /// Trigger the native Google Sign-In flow (mobile/desktop only).
-  Future<void> signInWithGoogle() async {
-    await ensureInitialized();
-    await _googleSignIn.authenticate();
-  }
-
-  /// Sign in dengan email + password via Supabase
-  Future<void> signInWithEmailPassword({
-    required String email,
-    required String password,
-  }) async {
-    await SupabaseService.auth.signInWithPassword(
-      email: email.trim(),
-      password: password,
-    );
-  }
-
-  /// Daftar akun baru dengan email + password via Supabase
-  Future<void> signUp({
-    required String email,
-    required String password,
-    String? displayName,
-  }) async {
-    await SupabaseService.auth.signUp(
-      email: email.trim(),
-      password: password,
-      data: displayName != null ? {'display_name': displayName} : null,
-    );
-  }
-
   /// Sign out
   Future<void> signOut() async {
     await ApiService.signOut();

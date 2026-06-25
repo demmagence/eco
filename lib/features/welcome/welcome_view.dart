@@ -27,10 +27,9 @@ class _WelcomeViewState extends State<WelcomeView>
   late final Animation<Offset> _taglineSlide;
 
   // Login form
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _obscurePass = true;
-  bool _isLogin = true; // toggle Login / Daftar
 
   AuthViewModel? _authVM;
 
@@ -90,7 +89,7 @@ class _WelcomeViewState extends State<WelcomeView>
     _pageController.dispose();
     _sheetController.dispose();
     _taglineController.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passCtrl.dispose();
     _authVM?.removeListener(_onAuthChanged);
     super.dispose();
@@ -474,9 +473,9 @@ class _WelcomeViewState extends State<WelcomeView>
 
               SizedBox(height: vGapSm),
 
-              // Title toggle (Masuk / Daftar)
+              // Title
               Text(
-                _isLogin ? 'Masuk ke akunmu' : 'Buat akun baru',
+                'Masuk ke akunmu',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: titleFontSz,
@@ -487,9 +486,7 @@ class _WelcomeViewState extends State<WelcomeView>
               ),
               SizedBox(height: vGapSm * 0.5),
               Text(
-                _isLogin
-                    ? 'Masukkan email dan password untuk melanjutkan.'
-                    : 'Daftarkan diri dan mulai lacak lingkunganmu.',
+                'Masukkan username dan password untuk melanjutkan.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: subtitleFontSz,
@@ -500,12 +497,12 @@ class _WelcomeViewState extends State<WelcomeView>
 
               SizedBox(height: vGapMd),
 
-              // Email field
+              // Username field
               _inputField(
-                controller: _emailCtrl,
-                label: 'Email',
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
+                controller: _usernameCtrl,
+                label: 'Username',
+                icon: Icons.person_outline,
+                keyboardType: TextInputType.text,
               ),
 
               SizedBox(height: vGapSm),
@@ -584,7 +581,7 @@ class _WelcomeViewState extends State<WelcomeView>
                           ),
                         )
                       : Text(
-                          _isLogin ? 'Masuk' : 'Daftar',
+                          'Masuk',
                           style: TextStyle(
                             fontSize: btnFontSz,
                             fontWeight: FontWeight.w700,
@@ -595,16 +592,14 @@ class _WelcomeViewState extends State<WelcomeView>
 
               SizedBox(height: vGapSm),
 
-              // Toggle Login ↔ Daftar
+              // Navigate to Register page
               GestureDetector(
                 onTap: () {
                   authVM.clearError();
-                  setState(() => _isLogin = !_isLogin);
+                  Navigator.of(context).pushNamed('/register');
                 },
                 child: Text(
-                  _isLogin
-                      ? 'Belum punya akun? Daftar sekarang'
-                      : 'Sudah punya akun? Masuk',
+                  'Belum punya akun? Daftar sekarang',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: (MediaQuery.of(context).size.width * 0.033)
@@ -624,19 +619,15 @@ class _WelcomeViewState extends State<WelcomeView>
   }
 
   void _submit(AuthViewModel authVM) {
-    final email = _emailCtrl.text.trim();
+    final username = _usernameCtrl.text.trim();
     final pass = _passCtrl.text;
 
-    if (email.isEmpty || pass.isEmpty) {
+    if (username.isEmpty || pass.isEmpty) {
       // Minimal validation
       return;
     }
 
-    if (_isLogin) {
-      authVM.signInWithEmailPassword(email: email, password: pass);
-    } else {
-      authVM.signUp(email: email, password: pass);
-    }
+    authVM.signIn(username, pass);
   }
 
   Widget _inputField({

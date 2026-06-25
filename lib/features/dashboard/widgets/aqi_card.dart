@@ -140,7 +140,7 @@ class AqiCard extends StatelessWidget {
                 Expanded(
                   child: _PollutantChip(
                     label: 'PM2.5',
-                    value: '${aqi.pm25.toStringAsFixed(1)}',
+                    value: aqi.pm25.toStringAsFixed(1),
                     unit: 'μg/m³',
                     color: statusColor,
                   ),
@@ -149,7 +149,7 @@ class AqiCard extends StatelessWidget {
                 Expanded(
                   child: _PollutantChip(
                     label: 'PM10',
-                    value: '${aqi.pm10.toStringAsFixed(1)}',
+                    value: aqi.pm10.toStringAsFixed(1),
                     unit: 'μg/m³',
                     color: statusColor,
                   ),
@@ -158,7 +158,7 @@ class AqiCard extends StatelessWidget {
                 Expanded(
                   child: _PollutantChip(
                     label: 'O₃',
-                    value: '${aqi.o3.toStringAsFixed(1)}',
+                    value: aqi.o3.toStringAsFixed(1),
                     unit: 'μg/m³',
                     color: statusColor,
                   ),
