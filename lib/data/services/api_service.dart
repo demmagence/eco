@@ -18,7 +18,6 @@ class ApiService {
   // --- SharedPreferences Keys ---
   static const String _tokenKey = 'auth_jwt_token';
   static const String _userIdKey = 'auth_user_id';
-  static const String _userNisKey = 'auth_user_nis';
   static const String _userDisplayNameKey = 'auth_user_display_name';
   static const String _userUsernameKey = 'auth_user_username';
   static const String _userEmailKey = 'auth_user_email';
@@ -45,7 +44,6 @@ class ApiService {
 
   // --- Current User State ---
   static String? get currentUserId => _prefs?.getString(_userIdKey);
-  static String? get currentUserNis => _prefs?.getString(_userNisKey);
   static String? get currentUserDisplayName => _prefs?.getString(_userDisplayNameKey);
   static String? get currentUserUsername => _prefs?.getString(_userUsernameKey);
   static String? get currentUserEmail => _prefs?.getString(_userEmailKey);
@@ -55,10 +53,8 @@ class ApiService {
 
   static Future<void> saveUser(Map<String, dynamic> user) async {
     await _prefs?.setString(_userIdKey, user['id'] as String? ?? '');
-    await _prefs?.setString(_userNisKey, user['nis'] as String? ?? '');
     await _prefs?.setString(_userDisplayNameKey, user['display_name'] as String? ?? '');
-    final username = user['username'] as String?;
-    if (username != null) await _prefs?.setString(_userUsernameKey, username);
+    await _prefs?.setString(_userUsernameKey, user['username'] as String? ?? '');
     final email = user['email'] as String?;
     if (email != null) await _prefs?.setString(_userEmailKey, email);
     final photoUrl = user['photo_url'] as String?;
@@ -73,7 +69,6 @@ class ApiService {
 
   static Future<void> clearUser() async {
     await _prefs?.remove(_userIdKey);
-    await _prefs?.remove(_userNisKey);
     await _prefs?.remove(_userDisplayNameKey);
     await _prefs?.remove(_userUsernameKey);
     await _prefs?.remove(_userEmailKey);

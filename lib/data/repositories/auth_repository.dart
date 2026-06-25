@@ -2,13 +2,13 @@ import 'package:eco/data/services/api_service.dart';
 import 'package:eco/data/models/user_model.dart';
 
 class AuthRepository {
-  /// Login dengan NIS dan password. Menyimpan JWT ke SharedPreferences.
+  /// Login dengan username dan password. Menyimpan JWT ke SharedPreferences.
   Future<UserModel> signIn({
-    required String nis,
+    required String username,
     required String password,
   }) async {
     final response = await ApiService.post('/auth/login', {
-      'nis': nis,
+      'username': username,
       'password': password,
     });
 
@@ -22,19 +22,17 @@ class AuthRepository {
     return UserModel.fromJson(userData);
   }
 
-  /// Registrasi siswa baru dengan NIS dan password.
+  /// Registrasi user baru dengan username dan password.
   Future<UserModel> signUp({
-    required String nis,
+    required String username,
     required String password,
     required String displayName,
-    String? username,
     String? email,
   }) async {
     final response = await ApiService.post('/auth/register', {
-      'nis': nis,
+      'username': username,
       'password': password,
       'display_name': displayName,
-      if (username != null && username.isNotEmpty) 'username': username,
       if (email != null && email.isNotEmpty) 'email': email,
     });
 
@@ -71,17 +69,16 @@ class AuthRepository {
     }
   }
 
-  /// Buat UserModel dari data lokal (SharedPreferences) sebagai fallback.
+  /// Dapatkan UserModel dari data lokal (SharedPreferences) sebagai fallback.
   UserModel? get _localUser {
     final id = ApiService.currentUserId;
     if (id == null) return null;
 
     return UserModel(
       id: id,
-      nis: ApiService.currentUserNis ?? '',
+      username: ApiService.currentUserUsername ?? '',
       email: ApiService.currentUserEmail ?? '',
       displayName: ApiService.currentUserDisplayName ?? '',
-      username: ApiService.currentUserUsername,
       photoUrl: ApiService.currentUserPhotoUrl,
       createdAt: ApiService.currentUserCreatedAt != null
           ? DateTime.tryParse(ApiService.currentUserCreatedAt!) ?? DateTime.now()

@@ -2,13 +2,12 @@
 CREATE DATABASE IF NOT EXISTS eco_db;
 USE eco_db;
 
--- 1. Users table (autentikasi NIS dan password)
+-- 1. Users table (autentikasi username dan password)
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) PRIMARY KEY,
-    nis VARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     display_name VARCHAR(100) NOT NULL,
-    username VARCHAR(50) UNIQUE,
     email VARCHAR(100),
     photo_url VARCHAR(255) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -92,7 +92,7 @@ class DashboardAppBar extends StatelessWidget {
                       ),
                     if (user?.formattedUsername != null)
                       Text(
-                        user!.formattedUsername!,
+                        user!.formattedUsername,
                         style: const TextStyle(
                           color: AppColors.textMuted,
                           fontSize: 12,

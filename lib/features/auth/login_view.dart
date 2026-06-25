@@ -14,7 +14,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _nisController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   late AnimationController _animController;
@@ -38,7 +38,7 @@ class _LoginViewState extends State<LoginView>
 
   @override
   void dispose() {
-    _nisController.dispose();
+    _usernameController.dispose();
     _passwordController.dispose();
     _animController.dispose();
     super.dispose();
@@ -49,7 +49,7 @@ class _LoginViewState extends State<LoginView>
     FocusScope.of(context).unfocus();
 
     final success = await authVM.signIn(
-      _nisController.text.trim(),
+      _usernameController.text.trim(),
       _passwordController.text,
     );
 
@@ -151,7 +151,7 @@ class _LoginViewState extends State<LoginView>
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Gunakan NIS dan password Anda',
+                                  'Gunakan username dan password Anda',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: Colors.white.withValues(alpha: 0.7),
@@ -159,15 +159,14 @@ class _LoginViewState extends State<LoginView>
                                 ),
                                 const SizedBox(height: 24),
 
-                                // NIS Field
+                                // Username Field
                                 _buildTextField(
-                                  controller: _nisController,
-                                  label: 'NIS (Nomor Induk Siswa)',
-                                  icon: Icons.badge_outlined,
-                                  keyboardType: TextInputType.number,
+                                  controller: _usernameController,
+                                  label: 'Username',
+                                  icon: Icons.person_outline,
                                   validator: (v) {
                                     if (v == null || v.trim().isEmpty) {
-                                      return 'NIS wajib diisi';
+                                      return 'Username wajib diisi';
                                     }
                                     return null;
                                   },
