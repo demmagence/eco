@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'package:eco/core/constants/app_colors.dart';
-import 'package:eco/core/constants/app_strings.dart';
 import 'package:eco/features/camera/camera_viewmodel.dart';
 
 class CameraView extends StatefulWidget {
@@ -14,6 +13,7 @@ class CameraView extends StatefulWidget {
 
 class _CameraViewState extends State<CameraView> {
   late CameraViewModel _cameraVM;
+  String _selectedMode = 'multiple'; // 'single' or 'multiple'
 
   @override
   void initState() {
@@ -77,27 +77,36 @@ class _CameraViewState extends State<CameraView> {
                 ),
               ),
 
-            // Top hint
+            // Multiple scan: scanning frame overlay
+            if (_selectedMode == 'multiple')
+              _buildScanFrameOverlay(),
+
+            // Top: mode selector
             Positioned(
               top: 16,
+              left: 16,
+              right: 16,
+              child: _buildModeSelector(),
+            ),
+
+            // Top hint text
+            Positioned(
+              top: 80,
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    AppStrings.cameraHint,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                    ),
+                  child: Text(
+                    _selectedMode == 'single'
+                        ? 'Arahkan ke sampah spesifik (jumlah sedikit)'
+                        : 'Arahkan ke pemandangan kotor / lingkungan luas',
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -142,21 +151,29 @@ class _CameraViewState extends State<CameraView> {
                           shape: BoxShape.circle,
                           color: Colors.white,
                           border: Border.all(
-                            color: AppColors.primary,
+                            color: _selectedMode == 'single'
+                                ? AppColors.accent
+                                : AppColors.primary,
                             width: 4,
                           ),
                         ),
                         child: cameraVM.isTakingPicture
-                            ? const Padding(
-                                padding: EdgeInsets.all(16),
+                            ? Padding(
+                                padding: const EdgeInsets.all(16),
                                 child: CircularProgressIndicator(
                                   strokeWidth: 3,
-                                  color: AppColors.primary,
+                                  color: _selectedMode == 'single'
+                                      ? AppColors.accent
+                                      : AppColors.primary,
                                 ),
                               )
-                            : const Icon(
-                                Icons.camera,
-                                color: AppColors.primary,
+                            : Icon(
+                                _selectedMode == 'single'
+                                    ? Icons.eco_rounded
+                                    : Icons.camera,
+                                color: _selectedMode == 'single'
+                                    ? AppColors.accent
+                                    : AppColors.primary,
                                 size: 36,
                               ),
                       ),
@@ -178,31 +195,207 @@ class _CameraViewState extends State<CameraView> {
     );
   }
 
-  Future<void> _captureImage(
-    BuildContext context,
-    CameraViewModel cameraVM,
-  ) async {
+  Widget _buildModeSelector() {
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          _ModeTab(
+            label: '🌿 Scan Single',
+            selected: _selectedMode == 'single',
+            selectedColor: AppColors.accent,
+            onTap: () => setState(() => _selectedMode = 'single'),
+          ),
+          _ModeTab(
+            label: '🔍 Scan Multiple',
+            selected: _selectedMode == 'multiple',
+            selectedColor: AppColors.primary,
+            onTap: () => setState(() => _selectedMode = 'multiple'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScanFrameOverlay() {
+    return Center(
+      child: Container(
+        width: 280,
+        height: 200,
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Stack(
+          children: [
+            // Corner accents
+            ..._buildCorners(AppColors.primary),
+            // Center label
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.7),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text(
+                    'Area Scan Lingkungan',
+                    style: TextStyle(color: Colors.white, fontSize: 11),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildCorners(Color color) {
+    const size = 20.0;
+    const thickness = 3.0;
+    return [
+      Positioned(top: 0, left: 0, child: _Corner(color: color, size: size, thickness: thickness, top: true, left: true)),
+      Positioned(top: 0, right: 0, child: _Corner(color: color, size: size, thickness: thickness, top: true, left: false)),
+      Positioned(bottom: 0, left: 0, child: _Corner(color: color, size: size, thickness: thickness, top: false, left: true)),
+      Positioned(bottom: 0, right: 0, child: _Corner(color: color, size: size, thickness: thickness, top: false, left: false)),
+    ];
+  }
+
+  Future<void> _captureImage(BuildContext context, CameraViewModel cameraVM) async {
     final bytes = await cameraVM.captureImage();
     if (bytes != null && context.mounted) {
       Navigator.of(context).pushNamed(
         '/scan-result',
-        arguments: bytes,
+        arguments: {'bytes': bytes, 'mode': _selectedMode},
       );
     }
   }
 
-  Future<void> _pickFromGallery(
-    BuildContext context,
-    CameraViewModel cameraVM,
-  ) async {
+  Future<void> _pickFromGallery(BuildContext context, CameraViewModel cameraVM) async {
     final bytes = await cameraVM.pickFromGallery();
     if (bytes != null && context.mounted) {
       Navigator.of(context).pushNamed(
         '/scan-result',
-        arguments: bytes,
+        arguments: {'bytes': bytes, 'mode': _selectedMode},
       );
     }
   }
+}
+
+class _ModeTab extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Color selectedColor;
+  final VoidCallback onTap;
+
+  const _ModeTab({
+    required this.label,
+    required this.selected,
+    required this.selectedColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            color: selected ? selectedColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(26),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Corner extends StatelessWidget {
+  final Color color;
+  final double size;
+  final double thickness;
+  final bool top;
+  final bool left;
+
+  const _Corner({
+    required this.color,
+    required this.size,
+    required this.thickness,
+    required this.top,
+    required this.left,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _CornerPainter(color: color, thickness: thickness, top: top, left: left),
+      ),
+    );
+  }
+}
+
+class _CornerPainter extends CustomPainter {
+  final Color color;
+  final double thickness;
+  final bool top;
+  final bool left;
+
+  _CornerPainter({required this.color, required this.thickness, required this.top, required this.left});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = thickness
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    if (top && left) {
+      path.moveTo(0, size.height);
+      path.lineTo(0, 0);
+      path.lineTo(size.width, 0);
+    } else if (top && !left) {
+      path.moveTo(0, 0);
+      path.lineTo(size.width, 0);
+      path.lineTo(size.width, size.height);
+    } else if (!top && left) {
+      path.moveTo(0, 0);
+      path.lineTo(0, size.height);
+      path.lineTo(size.width, size.height);
+    } else {
+      path.moveTo(0, size.height);
+      path.lineTo(size.width, size.height);
+      path.lineTo(size.width, 0);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(_CornerPainter old) => false;
 }
 
 class _ControlButton extends StatelessWidget {

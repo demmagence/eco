@@ -22,11 +22,25 @@ class GeminiService {
   Future<String> analyzeImage({
     required Uint8List imageBytes,
     String? locationContext,
+    String scanMode = 'multiple',
   }) async {
     final locationInfo =
         locationContext != null ? 'Lokasi: $locationContext. ' : '';
 
-    final prompt = '''
+    final prompt = scanMode == 'single' ? '''
+$locationInfo
+Kamu adalah ahli lingkungan hidup Indonesia yang berpengalaman dan bertindak sebagai Eco-Educator di lingkungan sekolah.
+Analisis foto sampah ini (skala kecil/sedikit/spesifik) dan berikan respons dalam format JSON berikut:
+
+{
+  "cara_buang": "Penjelasan detail dan praktis tentang cara membuang sampah yang ada di dalam foto dengan benar agar aman dan sesuai aturan sanitasi.",
+  "materi_edukasi": "Materi singkat/edukatif yang dirancang khusus untuk guru agar dapat diajarkan kepada siswa mengenai dampak sampah jenis ini di lingkungan sekolah.",
+  "pengelompokan": "Klasifikasikan sampah di foto secara spesifik (misal: organik, anorganik, B3, kertas, plastik, kaca) beserta penjelasannya.",
+  "daur_ulang": "Petunjuk praktis atau ide kreatif daur ulang (upcycling) yang dapat dilakukan oleh siswa untuk mendaur ulang sampah jenis ini."
+}
+
+Jawab dalam Bahasa Indonesia yang edukatif, ramah, dan mudah dipahami siswa sekolah.
+''' : '''
 $locationInfo
 Kamu adalah ahli lingkungan Indonesia yang berpengalaman. Analisis foto ini dan berikan respons dalam format JSON berikut:
 
@@ -134,7 +148,7 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
         Content.model([
           TextPart(
             'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
-            'Kondisi yang terdeteksi: ${scan.environmentCondition.length > 80 ? "${scan.environmentCondition.substring(0, 80)}..." : scan.environmentCondition}\n\n'
+            'Kondisi yang terdeteksi: ${(() { final ec = scan.environmentCondition ?? scan.correctDisposal ?? "kondisi lingkungan"; return ec.length > 80 ? "${ec.substring(0, 80)}..." : ec; })()}\n\n'
             'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?',
           ),
         ]),

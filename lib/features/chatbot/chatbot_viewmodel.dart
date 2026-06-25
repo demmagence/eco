@@ -89,7 +89,7 @@ class ChatbotViewModel extends ChangeNotifier {
 
       // Add the context greeting from Eco Assistant to the message list and save it
       final greetingText = 'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
-          'Kondisi yang terdeteksi: ${scan.environmentCondition.length > 80 ? "${scan.environmentCondition.substring(0, 80)}..." : scan.environmentCondition}\n\n'
+          'Kondisi yang terdeteksi: ${(() { final ec = scan.environmentCondition ?? scan.correctDisposal ?? "kondisi lingkungan"; return ec.length > 80 ? "${ec.substring(0, 80)}..." : ec; })()}\n\n'
           'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?';
       
       final welcomeMsg = ChatMessageModel(
