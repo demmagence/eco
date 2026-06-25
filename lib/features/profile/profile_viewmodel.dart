@@ -84,18 +84,12 @@ class ProfileViewModel extends ChangeNotifier {
       final Uint8List bytes = await image.readAsBytes();
       final String fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // 1. Upload to Supabase Storage
-      final String publicUrl = await _profileRepository.uploadAvatar(bytes, fileName);
+      final updatedUser = await _profileRepository.uploadAvatar(bytes, fileName);
 
-      // 2. Update profiles table
-      final updatedUser = await _profileRepository.updateProfile(photoUrl: publicUrl);
-
-      if (updatedUser != null) {
-        _user = updatedUser;
-        _isSaving = false;
-        notifyListeners();
-        return true;
-      }
+      _user = updatedUser;
+      _isSaving = false;
+      notifyListeners();
+      return true;
     } catch (_) {}
 
     _isSaving = false;
@@ -111,18 +105,12 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Delete from Storage
-      await _profileRepository.deleteAvatar(_user!.photoUrl!);
+      final updatedUser = await _profileRepository.deleteAvatar();
 
-      // 2. Update profiles table (clear photo_url)
-      final updatedUser = await _profileRepository.updateProfile(clearPhoto: true);
-
-      if (updatedUser != null) {
-        _user = updatedUser;
-        _isSaving = false;
-        notifyListeners();
-        return true;
-      }
+      _user = updatedUser;
+      _isSaving = false;
+      notifyListeners();
+      return true;
     } catch (_) {}
 
     _isSaving = false;

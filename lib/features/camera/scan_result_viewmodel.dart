@@ -5,7 +5,7 @@ import 'package:eco/data/models/scan_result_model.dart';
 import 'package:eco/data/repositories/gemini_repository.dart';
 import 'package:eco/data/repositories/scan_repository.dart';
 import 'package:eco/data/services/location_service.dart';
-import 'package:eco/data/services/supabase_service.dart';
+import 'package:eco/data/services/api_service.dart';
 
 class ScanResultViewModel extends ChangeNotifier {
   final GeminiRepository _geminiRepository;
@@ -46,7 +46,7 @@ class ScanResultViewModel extends ChangeNotifier {
 
   ScanResultModel get scanResult => ScanResultModel(
         id: '',
-        userId: SupabaseService.currentUserId ?? '',
+        userId: ApiService.currentUserId ?? '',
         imageUrl: _imageUrl ?? '',
         environmentCondition: _environmentCondition ?? '',
         impactPrediction: _impactPrediction ?? '',
@@ -158,7 +158,7 @@ class ScanResultViewModel extends ChangeNotifier {
       // Save to database
       final result = ScanResultModel(
         id: '',
-        userId: SupabaseService.currentUserId ?? '',
+        userId: ApiService.currentUserId ?? '',
         imageUrl: imageUrl,
         environmentCondition: _environmentCondition ?? '',
         impactPrediction: _impactPrediction ?? '',

@@ -1,10 +1,9 @@
 class ApiConstants {
   ApiConstants._();
 
-  // Supabase
-  static const String supabaseUrl = 'YOUR_SUPABASE_URL';
-  static const String supabaseAnonKey =
-      'YOUR_SUPABASE_ANON_KEY';
+  // Backend API (Node.js Local Server)
+  static const String apiBaseUrl = 'http://localhost:3000/api';
+  // For Android Emulator, use: 'http://10.0.2.2:3000/api'
 
   // Gemini AI (image analysis, daily tip, news)
   static const String geminiApiKey = 'YOUR_GEMINI_API_KEY';
@@ -25,10 +24,4 @@ class ApiConstants {
 
   // Google Maps
   static const String googleMapsApiKey = 'YOUR_GOOGLE_MAPS_API_KEY';
-
-  // Supabase Storage
-  static const String scanImagesBucket = 'scan-images';
-
-  // Google Sign-In
-  static const String googleWebClientId = 'YOUR_GOOGLE_WEB_CLIENT_ID';
 }
