@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Allow cleartext (plain HTTP) traffic only to the local development backend.
+  Android 9+ (API 28+) blocks cleartext by default in release builds; the app
+  talks to the Node server over http://localhost:3000 (bridged via
+  `adb reverse tcp:3000 tcp:3000`), so we whitelist the loopback hosts.
+  All other traffic stays HTTPS-only.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+</network-security-config>

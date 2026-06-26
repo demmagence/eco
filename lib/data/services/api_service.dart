@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,17 +6,24 @@ class ApiService {
   ApiService._();
 
   // --- Base URL Configuration ---
-  // On Web / Windows / Linux / macOS, the backend runs on localhost:3000
-  // On Android Emulator, the host machine localhost is mapped to 10.0.2.2
-  static String get baseServerUrl {
-    if (kIsWeb) return 'http://localhost:3000';
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:3000';
-    }
-    return 'http://localhost:3000';
-  }
+  // The backend runs on the host machine at localhost:3000.
+  //
+  // On a physical Android device (and on the emulator) `localhost` refers to
+  // the device itself, so it can't reach the host directly. We rely on adb to
+  // bridge it over USB/the adb channel:
+  //
+  //     adb reverse tcp:3000 tcp:3000
+  //
+  // With that in place, `localhost:3000` on the device tunnels to the host's
+  // localhost:3000 — works for both physical devices and emulators, and avoids
+  // host-firewall issues. (The old `10.0.2.2` alias only worked on emulators.)
+  static String get baseServerUrl => 'http://localhost:3000';
 
   static String get baseUrl => '$baseServerUrl/api';
+
+  /// Network requests time out after this duration so failures surface quickly
+  /// instead of hanging on the OS-level socket timeout (~2 minutes).
+  static const Duration _requestTimeout = Duration(seconds: 15);
 
   // --- SharedPreferences Keys ---
   static const String _tokenKey = 'auth_jwt_token';
@@ -94,25 +100,29 @@ class ApiService {
   /// GET request
   static Future<http.Response> get(String path) async {
     final uri = Uri.parse('$baseUrl$path');
-    return http.get(uri, headers: _headers);
+    return http.get(uri, headers: _headers).timeout(_requestTimeout);
   }
 
   /// POST request with JSON body
   static Future<http.Response> post(String path, Map<String, dynamic> body) async {
     final uri = Uri.parse('$baseUrl$path');
-    return http.post(uri, headers: _headers, body: jsonEncode(body));
+    return http
+        .post(uri, headers: _headers, body: jsonEncode(body))
+        .timeout(_requestTimeout);
   }
 
   /// PUT request with JSON body
   static Future<http.Response> put(String path, Map<String, dynamic> body) async {
     final uri = Uri.parse('$baseUrl$path');
-    return http.put(uri, headers: _headers, body: jsonEncode(body));
+    return http
+        .put(uri, headers: _headers, body: jsonEncode(body))
+        .timeout(_requestTimeout);
   }
 
   /// DELETE request
   static Future<http.Response> delete(String path) async {
     final uri = Uri.parse('$baseUrl$path');
-    return http.delete(uri, headers: _headers);
+    return http.delete(uri, headers: _headers).timeout(_requestTimeout);
   }
 
   /// Multipart POST for file upload
