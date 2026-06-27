@@ -559,8 +559,13 @@ app.get('/api/chat/sessions/count', checkDb, authenticateToken, async (req, res)
   }
 });
 
-// Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`VibEco Server running on port ${PORT}`);
-  console.log(`Static uploads available at http://localhost:${PORT}/uploads`);
-});
+// Export app for Vercel
+module.exports = app;
+
+// Start Server (only if not running on Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`VibEco Server running on port ${PORT}`);
+    console.log(`Static uploads available at http://localhost:${PORT}/uploads`);
+  });
+}
