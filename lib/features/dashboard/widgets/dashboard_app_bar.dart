@@ -30,124 +30,146 @@ class DashboardAppBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // ── Left: Clock + Location ──
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onLocationTap?.call();
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  currentTime,
-                  style: const TextStyle(
-                    color: AppColors.lightTextMuted,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
+          Expanded(
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onLocationTap?.call();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    currentTime,
+                    style: const TextStyle(
+                      color: AppColors.lightTextMuted,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.location_on,
-                      color: AppColors.lightAccentEmerald,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      cityName.isNotEmpty ? cityName : 'Lokasi',
-                      style: const TextStyle(
-                        color: AppColors.lightDarkEmerald,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.3,
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: AppColors.lightAccentEmerald,
+                        size: 16,
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          cityName.isNotEmpty ? cityName : 'Lokasi',
+                          style: const TextStyle(
+                            color: AppColors.lightDarkEmerald,
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
+          const SizedBox(width: 16), // Spacer to avoid clashing when texts are long
+
           // ── Right: Profile Section ──
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
-              onProfileTap?.call();
-            },
-            child: Row(
-              children: [
-                // Name + Username
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (user?.displayName.isNotEmpty == true)
-                      Text(
-                        user!.displayName,
-                        style: const TextStyle(
-                          color: AppColors.lightDarkEmerald,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    if (user?.formattedUsername != null)
-                      Text(
-                        user!.formattedUsername,
-                        style: const TextStyle(
-                          color: AppColors.lightTextMuted,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      )
-                    else if (user?.displayName.isEmpty == true &&
-                        user?.email.isNotEmpty == true)
-                      Text(
-                        user!.email,
-                        style: const TextStyle(
-                          color: AppColors.lightTextMuted,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                // Avatar
-                Hero(
-                  tag: 'profile_avatar',
-                  child: Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.lightBorder,
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.lightShadow,
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
+          Flexible(
+            child: GestureDetector(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onProfileTap?.call();
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Name + Username
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (user?.displayName.isNotEmpty == true)
+                          Text(
+                            user!.displayName,
+                            style: const TextStyle(
+                              color: AppColors.lightDarkEmerald,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        if (user?.formattedUsername != null)
+                          Text(
+                            user!.formattedUsername,
+                            style: const TextStyle(
+                              color: AppColors.lightTextMuted,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        else if (user?.displayName.isEmpty == true &&
+                            user?.email.isNotEmpty == true)
+                          Text(
+                            user!.email,
+                            style: const TextStyle(
+                              color: AppColors.lightTextMuted,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                       ],
                     ),
-                    child: ClipOval(
-                      child: user?.photoUrl != null
-                          ? CachedNetworkImage(
-                              imageUrl: user!.photoUrl!,
-                              width: 44,
-                              height: 44,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, _, _) => _defaultAvatar(),
-                            )
-                          : _defaultAvatar(),
+                  ),
+                  const SizedBox(width: 12),
+                  // Avatar
+                  Hero(
+                    tag: 'profile_avatar',
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.lightBorder,
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.lightShadow,
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: user?.photoUrl != null
+                            ? CachedNetworkImage(
+                                imageUrl: user!.photoUrl!,
+                                width: 44,
+                                height: 44,
+                                fit: BoxFit.cover,
+                                errorWidget: (_, _, _) => _defaultAvatar(),
+                              )
+                            : _defaultAvatar(),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
