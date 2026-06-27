@@ -17,16 +17,16 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_JWT_SECRET';
 app.use(cors());
 app.use(express.json());
 
-// Create uploads directory if not exists
-const uploadsDir = path.join(__dirname, 'uploads');
-const avatarsDir = path.join(uploadsDir, 'avatars');
-const scansDir = path.join(uploadsDir, 'scans');
-
-[uploadsDir, avatarsDir, scansDir].forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
+// Create uploads directory if not exists (wrapped in try-catch for read-only systems like Vercel)
+try {
+  [uploadsDir, avatarsDir, scansDir].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+} catch (e) {
+  console.warn('Warning: Gagal membuat folder upload (lingkungan read-only seperti Vercel):', e.message);
+}
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
