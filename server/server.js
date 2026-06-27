@@ -10,6 +10,14 @@ const { v4: uuidv4 } = require('uuid');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
+
+// Global error handlers to prevent Vercel serverless container from crashing on unhandled errors
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_JWT_SECRET';
 
@@ -49,6 +57,12 @@ let pool;
 async function initializeDb() {
   try {
     pool = mysql.createPool(dbConfig);
+    
+    // Add error listener to pool to prevent unhandled process crashes
+    pool.on('error', (err) => {
+      console.error('MySQL Pool error:', err);
+    });
+
     // Test the connection
     const connection = await pool.getConnection();
     console.log('MySQL Database Connected successfully to:', dbConfig.database);
