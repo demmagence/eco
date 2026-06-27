@@ -135,16 +135,19 @@ class _DashboardViewState extends State<DashboardView> {
                   // Dynamic Cards list with stagger animation
                   Column(
                     children: [
-                      // Weather Section
-                      if (showWeather && dashVM.weather != null) ...[
-                        WeatherCard(weather: dashVM.weather!),
-                        const SizedBox(height: 16),
-                      ],
-
-                      // AQI Section
-                      if (showWeather && dashVM.aqi != null) ...[
-                        AqiCard(aqi: dashVM.aqi!),
-                        const SizedBox(height: 16),
+                      // Weather & AQI Section
+                      if (showWeather) ...[
+                        if (dashVM.weather != null) ...[
+                          WeatherCard(weather: dashVM.weather!),
+                          const SizedBox(height: 16),
+                          if (dashVM.aqi != null) ...[
+                            AqiCard(aqi: dashVM.aqi!),
+                            const SizedBox(height: 16),
+                          ],
+                        ] else ...[
+                          _buildWeatherPlaceholderCard(),
+                          const SizedBox(height: 16),
+                        ],
                       ],
 
                       // Ecology Sections
@@ -172,6 +175,54 @@ class _DashboardViewState extends State<DashboardView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildWeatherPlaceholderCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightCardBackground,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        boxShadow: const [
+          BoxShadow(
+            color: AppColors.lightShadow,
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wb_sunny_outlined, color: Colors.amber, size: 28),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Cuaca & Kualitas Udara',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.lightTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Informasi cuaca tidak dapat dimuat karena OWM API key belum diatur atau tidak valid. Silakan atur "owmApiKey" di "api_constants.dart".',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: AppColors.lightTextSecondary.withOpacity(0.8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/features/camera/camera_viewmodel.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
@@ -52,24 +53,55 @@ class _CameraViewState extends State<CameraView> {
                 color: Colors.black,
                 child: Center(
                   child: cameraVM.errorMessage != null
-                      ? Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.camera_alt,
-                              color: Colors.white54,
-                              size: 64,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              cameraVM.errorMessage!,
-                              style: const TextStyle(
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.camera_alt,
                                 color: Colors.white54,
-                                fontSize: 14,
+                                size: 64,
                               ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              Text(
+                                cameraVM.errorMessage!,
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (cameraVM.errorMessage!.contains('CameraAccessDenied') ||
+                                  cameraVM.errorMessage!.contains('permission was denied')) ...[
+                                const SizedBox(height: 24),
+                                ElevatedButton.icon(
+                                  onPressed: () => cameraVM.initializeCamera(),
+                                  icon: const Icon(Icons.refresh, color: Colors.white),
+                                  label: const Text(
+                                    'Coba Minta Izin Lagi',
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton.icon(
+                                  onPressed: () => openAppSettings(),
+                                  icon: const Icon(Icons.settings, color: Colors.white54, size: 18),
+                                  label: const Text(
+                                    'Buka Pengaturan Aplikasi',
+                                    style: TextStyle(color: Colors.white54, fontSize: 13),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
                         )
                       : const CircularProgressIndicator(
                           color: AppColors.primary,

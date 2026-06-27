@@ -157,22 +157,33 @@ class DashboardViewModel extends ChangeNotifier {
         );
         notifyListeners();
 
-        // Load weather and AQI in parallel
-        final results = await Future.wait([
-          _weatherRepository.getWeather(
-            latitude: position.latitude,
-            longitude: position.longitude,
-          ),
-          _weatherRepository.getAqi(
-            latitude: position.latitude,
-            longitude: position.longitude,
-          ),
-          _scanRepository.getScanCount(),
-        ]);
+        // Load scan count
+        try {
+          _totalScans = await _scanRepository.getScanCount();
+        } catch (scanErr) {
+          debugPrint('Scan count load failed: $scanErr');
+          _totalScans = 0;
+        }
 
-        _weather = results[0] as WeatherModel;
-        _aqi = results[1] as AqiModel;
-        _totalScans = results[2] as int;
+        // Load weather and AQI in parallel (non-blocking)
+        try {
+          final weatherResults = await Future.wait([
+            _weatherRepository.getWeather(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            ),
+            _weatherRepository.getAqi(
+              latitude: position.latitude,
+              longitude: position.longitude,
+            ),
+          ]);
+          _weather = weatherResults[0] as WeatherModel;
+          _aqi = weatherResults[1] as AqiModel;
+        } catch (weatherErr) {
+          debugPrint('Weather or AQI load failed: $weatherErr');
+          _weather = null;
+          _aqi = null;
+        }
       } else {
         _locationName = 'Lokasi tidak tersedia';
         _cityName = 'Lokasi';
