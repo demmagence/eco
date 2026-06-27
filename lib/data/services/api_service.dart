@@ -17,7 +17,7 @@ class ApiService {
   // With that in place, `localhost:3000` on the device tunnels to the host's
   // localhost:3000 — works for both physical devices and emulators, and avoids
   // host-firewall issues. (The old `10.0.2.2` alias only worked on emulators.)
-  static String get baseServerUrl => 'http://localhost:3000';
+  static String get baseServerUrl => 'https://eco-beta-nine.vercel.app';
 
   static String get baseUrl => '$baseServerUrl/api';
 
