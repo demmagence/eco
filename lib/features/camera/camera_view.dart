@@ -42,8 +42,8 @@ class _CameraViewState extends State<CameraView> {
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
-                    width: cameraVM.controller!.value.previewSize?.height ?? 0,
-                    height: cameraVM.controller!.value.previewSize?.width ?? 0,
+                    width: cameraVM.controller!.value.previewSize?.height ?? 1080,
+                    height: cameraVM.controller!.value.previewSize?.width ?? 1920,
                     child: CameraPreview(cameraVM.controller!),
                   ),
                 ),
