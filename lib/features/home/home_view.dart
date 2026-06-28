@@ -19,7 +19,7 @@ class HomeView extends StatelessWidget {
       child: Consumer<HomeViewModel>(
         builder: (context, homeVM, child) {
           return Scaffold(
-            backgroundColor: AppColors.backgroundPrimary,
+            backgroundColor: AppColors.background,
             extendBody: true, // Allow content to flow under the floating bottom bar
             body: IndexedStack(
               index: homeVM.currentIndex,
@@ -66,11 +66,11 @@ class _FloatingBottomBar extends StatelessWidget {
       height: 72,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.lightPrimaryEmerald,
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: AppColors.lightPrimaryEmerald.withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 24,
             offset: const Offset(0, 8),
           ),
@@ -179,10 +179,10 @@ class _CameraFloatingButton extends StatelessWidget {
         height: 58,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: AppColors.cameraGlow,
+          color: AppColors.accent,
           boxShadow: [
             BoxShadow(
-              color: AppColors.accent.withValues(alpha: isSelected ? 0.6 : 0.3),
+              color: AppColors.accent.withValues(alpha: isSelected ? 0.5 : 0.25),
               blurRadius: isSelected ? 20 : 12,
               spreadRadius: isSelected ? 4 : 1,
               offset: const Offset(0, 4),

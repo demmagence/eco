@@ -120,7 +120,7 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: AppColors.welcomeGradient,
+          color: AppColors.primary,
         ),
         // Semua konten slide bersama — no fade, easeOutExpo
         child: SlideTransition(

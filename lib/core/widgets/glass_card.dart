@@ -1,14 +1,12 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:eco/core/constants/app_colors.dart';
 
-/// A reusable glassmorphism card with frosted-glass backdrop blur,
-/// translucent background, and subtle border.
+/// A simple card used on dark backgrounds (splash, welcome screens).
+/// No glassmorphism/blur — just a clean semi-transparent card.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double borderRadius;
-  final double blur;
+  final double blur; // kept for backward compat but unused
   final double opacity;
   final Color? borderColor;
   final VoidCallback? onTap;
@@ -17,9 +15,9 @@ class GlassCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(20),
-    this.borderRadius = 24,
-    this.blur = 12,
-    this.opacity = 0.08,
+    this.borderRadius = 16,
+    this.blur = 0,
+    this.opacity = 0.12,
     this.borderColor,
     this.onTap,
   });
@@ -28,30 +26,24 @@ class GlassCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: opacity),
-              borderRadius: BorderRadius.circular(borderRadius),
-              border: Border.all(
-                color: borderColor ?? AppColors.glassBorder,
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: child,
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: opacity),
+          borderRadius: BorderRadius.circular(borderRadius),
+          border: Border.all(
+            color: borderColor ?? Colors.white.withValues(alpha: 0.15),
+            width: 1,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
+        child: child,
       ),
     );
   }

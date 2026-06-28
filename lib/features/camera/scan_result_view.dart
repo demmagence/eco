@@ -216,7 +216,7 @@ class _ScanResultViewState extends State<ScanResultView>
                 if (scanVM.scanType == 'single') ...[
                   if (scanVM.correctDisposal?.isNotEmpty == true)
                     _AnalysisCard(
-                      gradientColors: const [Color(0xFF1B5E20), Color(0xFF43A047)],
+                      color: AppColors.accent,
                       icon: Icons.delete_outline_rounded,
                       title: 'Cara Membuang yang Benar',
                       content: scanVM.correctDisposal!,
@@ -224,7 +224,7 @@ class _ScanResultViewState extends State<ScanResultView>
                     ),
                   if (scanVM.trashClassification?.isNotEmpty == true)
                     _AnalysisCard(
-                      gradientColors: const [Color(0xFF4A148C), Color(0xFF9C27B0)],
+                      color: AppColors.secondary,
                       icon: Icons.category_rounded,
                       title: 'Pengelompokan Sampah',
                       content: scanVM.trashClassification!,
@@ -232,7 +232,7 @@ class _ScanResultViewState extends State<ScanResultView>
                     ),
                   if (scanVM.recyclingInfo?.isNotEmpty == true)
                     _AnalysisCard(
-                      gradientColors: const [Color(0xFF0277BD), Color(0xFF29B6F6)],
+                      color: AppColors.primary,
                       icon: Icons.recycling_rounded,
                       title: 'Informasi Daur Ulang',
                       content: scanVM.recyclingInfo!,
@@ -243,7 +243,7 @@ class _ScanResultViewState extends State<ScanResultView>
                       content: scanVM.teacherMaterial!,
                       title: 'Materi Edukasi untuk Guru',
                       icon: Icons.school_rounded,
-                      gradientColors: const [Color(0xFFBF360C), Color(0xFFFF7043)],
+                      color: AppColors.secondary,
                     ),
                 ]
 
@@ -251,7 +251,7 @@ class _ScanResultViewState extends State<ScanResultView>
                 else ...[
                   if (scanVM.environmentCondition?.isNotEmpty == true)
                     _AnalysisCard(
-                      gradientColors: const [Color(0xFF1565C0), Color(0xFF5E92F3)],
+                      color: AppColors.secondary,
                       icon: Icons.search_rounded,
                       title: AppStrings.environmentCondition,
                       content: scanVM.environmentCondition!,
@@ -259,7 +259,7 @@ class _ScanResultViewState extends State<ScanResultView>
                     ),
                   if (scanVM.impactPrediction?.isNotEmpty == true)
                     _AnalysisCard(
-                      gradientColors: const [Color(0xFFE65100), Color(0xFFFF9800)],
+                      color: AppColors.error,
                       icon: Icons.warning_amber_rounded,
                       title: AppStrings.impactPrediction,
                       content: scanVM.impactPrediction!,
@@ -268,6 +268,7 @@ class _ScanResultViewState extends State<ScanResultView>
                   if (scanVM.suggestions?.isNotEmpty == true)
                     _SuggestionsCard(
                       content: scanVM.suggestions!,
+                      color: AppColors.accent,
                     ),
                   if (scanVM.contacts.isNotEmpty) ...[
                     _buildSectionLabel('Instansi Terkait'),
@@ -355,7 +356,7 @@ class _ScanResultViewState extends State<ScanResultView>
           width: 4,
           height: 20,
           decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),
@@ -378,13 +379,7 @@ class _ScanResultViewState extends State<ScanResultView>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isSingle
-              ? [const Color(0xFF1B5E20), const Color(0xFF43A047)]
-              : [const Color(0xFF1565C0), const Color(0xFF5E92F3)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: isSingle ? AppColors.accent : AppColors.primary,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -392,14 +387,14 @@ class _ScanResultViewState extends State<ScanResultView>
         children: [
           Icon(
             isSingle ? Icons.eco_rounded : Icons.search_rounded,
-            color: Colors.white,
+            color: isSingle ? AppColors.textPrimary : Colors.white,
             size: 14,
           ),
           const SizedBox(width: 6),
           Text(
             isSingle ? 'Scan Single — Edukasi Sampah' : 'Scan Multiple — Analisis Lingkungan',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: isSingle ? AppColors.textPrimary : Colors.white,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -460,11 +455,7 @@ class _ScanResultViewState extends State<ScanResultView>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF2E7D32), Color(0xFF1565C0)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              color: AppColors.secondary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: Row(
@@ -574,11 +565,7 @@ class _ScanResultViewState extends State<ScanResultView>
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppColors.primary, AppColors.primaryLight],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          color: AppColors.primary,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -629,14 +616,14 @@ class _ScanResultViewState extends State<ScanResultView>
 // ─── Analysis Card ───────────────────────────────────────────────────────────
 
 class _AnalysisCard extends StatelessWidget {
-  final List<Color> gradientColors;
+  final Color color;
   final IconData icon;
   final String title;
   final String content;
   final int delay;
 
   const _AnalysisCard({
-    required this.gradientColors,
+    required this.color,
     required this.icon,
     required this.title,
     required this.content,
@@ -652,7 +639,7 @@ class _AnalysisCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: gradientColors.first.withValues(alpha: 0.12),
+            color: color.withValues(alpha: 0.12),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -665,11 +652,7 @@ class _AnalysisCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: gradientColors,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              color: color,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: Row(
@@ -719,13 +702,13 @@ class _SuggestionsCard extends StatelessWidget {
   final String content;
   final String title;
   final IconData icon;
-  final List<Color> gradientColors;
+  final Color color;
 
   const _SuggestionsCard({
     required this.content,
     this.title = AppStrings.suggestions,
     this.icon = Icons.lightbulb_rounded,
-    this.gradientColors = const [Color(0xFF2E7D32), Color(0xFF60AD5E)],
+    this.color = AppColors.accent,
   });
 
   List<String> _parseBullets(String text) {
@@ -750,7 +733,7 @@ class _SuggestionsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -763,11 +746,7 @@ class _SuggestionsCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: gradientColors,
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              color: color,
               borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: Row(
@@ -845,11 +824,7 @@ class _BulletPoint extends StatelessWidget {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, AppColors.primaryLight],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Center(
@@ -909,11 +884,7 @@ class _ContactsCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1565C0), Color(0xFF1976D2)],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
+              color: AppColors.secondary,
               borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
             ),
             child: Row(
@@ -993,11 +964,7 @@ class _ContactItem extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+                  color: AppColors.highlight.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -1060,11 +1027,7 @@ class _ContactItem extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(

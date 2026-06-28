@@ -143,12 +143,11 @@ class _WelcomeViewState extends State<WelcomeView>
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          /// LAYER 1 — Full green gradient (biar radius card keliatan jelas)
           Container(
             width: double.infinity,
             height: double.infinity,
             decoration: const BoxDecoration(
-              gradient: AppColors.welcomeGradient,
+              color: AppColors.primary,
             ),
           ),
 

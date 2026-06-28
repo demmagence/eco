@@ -1,67 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:eco/core/constants/app_colors.dart';
 
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get darkTheme {
+  static ThemeData get darkTheme => lightTheme; // alias — app is light-mode only
+
+  static ThemeData get lightTheme {
+    final baseTextTheme = GoogleFonts.plusJakartaSansTextTheme();
+
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
-        primary: AppColors.accent,
-        secondary: AppColors.secondaryEmerald,
+      brightness: Brightness.light,
+      colorScheme: ColorScheme.light(
+        primary: AppColors.primary,
+        secondary: AppColors.secondary,
         surface: AppColors.surface,
         error: AppColors.error,
-        onPrimary: AppColors.backgroundPrimary,
+        onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: Colors.white,
+        onSurface: AppColors.textPrimary,
         onError: Colors.white,
       ),
-      scaffoldBackgroundColor: AppColors.backgroundPrimary,
-      fontFamily: 'Roboto',
+      scaffoldBackgroundColor: AppColors.background,
+      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
         backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        systemOverlayStyle: SystemUiOverlayStyle.light,
-        titleTextStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
+        foregroundColor: AppColors.textPrimary,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.textPrimary,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
           letterSpacing: -0.3,
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
 
       // Card Theme
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         color: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         clipBehavior: Clip.antiAlias,
       ),
 
-      // Bottom Navigation Bar (fallback; HomeView uses custom nav)
+      // Bottom Navigation Bar
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        selectedItemColor: AppColors.accent,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textMuted,
         type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: const TextStyle(
+        selectedLabelStyle: GoogleFonts.plusJakartaSans(
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: const TextStyle(
+        unselectedLabelStyle: GoogleFonts.plusJakartaSans(
           fontSize: 12,
           fontWeight: FontWeight.w400,
         ),
@@ -71,16 +76,16 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          backgroundColor: AppColors.accent,
-          foregroundColor: AppColors.backgroundPrimary,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
-          textStyle: const TextStyle(
-            fontSize: 16,
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 15,
             fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
+            letterSpacing: 0.3,
           ),
         ),
       ),
@@ -88,11 +93,11 @@ class AppTheme {
       // Outlined Button
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.accent,
-          side: BorderSide(color: AppColors.glassBorder),
+          foregroundColor: AppColors.primary,
+          side: const BorderSide(color: AppColors.border),
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
@@ -100,42 +105,44 @@ class AppTheme {
       // Text Button
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.accent,
+          foregroundColor: AppColors.primary,
         ),
       ),
 
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.glass,
+        fillColor: AppColors.surfaceVariant,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.glassBorder),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: AppColors.glassBorder),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.accent, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
+          horizontal: 16,
+          vertical: 14,
         ),
-        hintStyle: TextStyle(
+        hintStyle: GoogleFonts.plusJakartaSans(
           color: AppColors.textMuted,
           fontSize: 14,
         ),
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.textSecondary,
+        ),
       ),
 
       // Divider
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         space: 1,
         thickness: 1,
-        color: AppColors.glassBorder,
+        color: AppColors.border,
       ),
 
       // Dialog
@@ -143,14 +150,14 @@ class AppTheme {
         backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
         ),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 18,
+        titleTextStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.textPrimary,
+          fontSize: 17,
           fontWeight: FontWeight.w600,
         ),
-        contentTextStyle: const TextStyle(
+        contentTextStyle: GoogleFonts.plusJakartaSans(
           color: AppColors.textSecondary,
           fontSize: 14,
         ),
@@ -158,34 +165,34 @@ class AppTheme {
 
       // Bottom Sheet
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: AppColors.backgroundSecondary,
+        backgroundColor: AppColors.surface,
         surfaceTintColor: Colors.transparent,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        modalBarrierColor: Colors.black54,
+        modalBarrierColor: Colors.black38,
       ),
 
       // Tab Bar
       tabBarTheme: TabBarThemeData(
-        indicatorColor: AppColors.accent,
-        labelColor: AppColors.accent,
+        indicatorColor: AppColors.primary,
+        labelColor: Colors.white,
         unselectedLabelColor: AppColors.textMuted,
-        indicatorSize: TabBarIndicatorSize.label,
-        labelStyle: const TextStyle(
-          fontSize: 14,
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontSize: 14,
+        unselectedLabelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
           fontWeight: FontWeight.w400,
         ),
       ),
 
       // Snackbar
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.surface,
-        contentTextStyle: const TextStyle(color: Colors.white),
+        backgroundColor: AppColors.primary,
+        contentTextStyle: GoogleFonts.plusJakartaSans(color: Colors.white),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -197,61 +204,58 @@ class AppTheme {
         color: AppColors.textSecondary,
       ),
 
-      // Text Theme
-      textTheme: const TextTheme(
-        headlineLarge: TextStyle(
-          color: Colors.white,
-          fontSize: 28,
+      // Text Theme — Consistent sizes
+      textTheme: TextTheme(
+        headlineLarge: baseTextTheme.headlineLarge?.copyWith(
+          color: AppColors.textPrimary,
+          fontSize: 24,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
-        headlineMedium: TextStyle(
-          color: Colors.white,
-          fontSize: 24,
+        headlineMedium: baseTextTheme.headlineMedium?.copyWith(
+          color: AppColors.textPrimary,
+          fontSize: 20,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.3,
         ),
-        headlineSmall: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-        ),
-        titleLarge: TextStyle(
-          color: Colors.white,
+        headlineSmall: baseTextTheme.headlineSmall?.copyWith(
+          color: AppColors.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        titleMedium: TextStyle(
-          color: Colors.white,
+        titleLarge: baseTextTheme.titleLarge?.copyWith(
+          color: AppColors.textPrimary,
           fontSize: 16,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
-        titleSmall: TextStyle(
-          color: AppColors.textSecondary,
+        titleMedium: baseTextTheme.titleMedium?.copyWith(
+          color: AppColors.textPrimary,
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        bodyLarge: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-        ),
-        bodyMedium: TextStyle(
+        titleSmall: baseTextTheme.titleSmall?.copyWith(
           color: AppColors.textSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
+          color: AppColors.textPrimary,
           fontSize: 14,
         ),
-        bodySmall: TextStyle(
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+          color: AppColors.textSecondary,
+          fontSize: 13,
+        ),
+        bodySmall: baseTextTheme.bodySmall?.copyWith(
           color: AppColors.textMuted,
           fontSize: 12,
         ),
-        labelLarge: TextStyle(
-          color: Colors.white,
-          fontSize: 14,
+        labelLarge: baseTextTheme.labelLarge?.copyWith(
+          color: AppColors.textPrimary,
+          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
     );
   }
-
-  // Keep lightTheme as an alias for backward compat if anything references it
-  static ThemeData get lightTheme => darkTheme;
 }

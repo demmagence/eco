@@ -15,11 +15,11 @@ class WasteTypeCard extends StatelessWidget {
 
   /// Color palette for waste categories
   static const List<Color> _categoryColors = [
-    Color(0xFF0F4D3A), // Emerald primary
-    Color(0xFF34D399), // Accent emerald
-    Color(0xFF1A6B53), // Secondary emerald
-    Color(0xFF6EE7B7), // Light emerald
-    Color(0xFF8BA69A), // Muted emerald
+    Color(0xFF143D60), // Navy primary
+    Color(0xFF27667B), // Teal
+    Color(0xFFA0C878), // Green accent
+    Color(0xFFDDEB9D), // Light accent
+    Color(0xFF5A7A8A), // Muted blue
   ];
 
   Color _colorForIndex(int index) {

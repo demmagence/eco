@@ -24,73 +24,67 @@ class DashboardSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.lightGlass,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.lightBorder),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.lightShadow,
-                    blurRadius: 16,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: AppColors.lightCardBackground,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.lightBorder),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.lightShadow,
+                blurRadius: 12,
+                offset: Offset(0, 4),
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search,
-                    color: AppColors.lightTextMuted,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      onChanged: onChanged,
-                      style: const TextStyle(
-                        color: AppColors.lightTextPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: const InputDecoration(
-                        hintText: AppStrings.searchHint,
-                        hintStyle: TextStyle(
-                          color: AppColors.lightTextMuted,
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        filled: false,
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 16),
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: onFilterTap,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.lightPrimaryEmerald.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.tune,
-                        color: AppColors.lightPrimaryEmerald,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                ],
+            ],
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.search,
+                color: AppColors.lightTextMuted,
+                size: 20,
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  onChanged: onChanged,
+                  style: const TextStyle(
+                    color: AppColors.lightTextPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: const InputDecoration(
+                    hintText: AppStrings.searchHint,
+                    hintStyle: TextStyle(
+                      color: AppColors.lightTextMuted,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    filled: false,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onFilterTap,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.tune,
+                    color: AppColors.primary,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
 

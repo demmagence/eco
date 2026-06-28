@@ -73,7 +73,7 @@ class _DashboardViewState extends State<DashboardView> {
           body: SafeArea(
             child: RefreshIndicator(
               onRefresh: dashVM.refresh,
-              color: AppColors.lightPrimaryEmerald,
+              color: AppColors.primary,
               backgroundColor: AppColors.lightCardBackground,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -185,7 +185,7 @@ class _DashboardViewState extends State<DashboardView> {
       decoration: BoxDecoration(
         color: AppColors.lightCardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber.withOpacity(0.3)),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
         boxShadow: const [
           BoxShadow(
             color: AppColors.lightShadow,
@@ -215,7 +215,7 @@ class _DashboardViewState extends State<DashboardView> {
                   'Informasi cuaca tidak dapat dimuat karena OWM API key belum diatur atau tidak valid. Silakan atur "owmApiKey" di "api_constants.dart".',
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.lightTextSecondary.withOpacity(0.8),
+                    color: AppColors.lightTextSecondary.withValues(alpha: 0.8),
                   ),
                 ),
               ],

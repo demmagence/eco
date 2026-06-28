@@ -82,10 +82,10 @@ class _ProfileViewState extends State<ProfileView> {
                             background: Stack(
                               fit: StackFit.expand,
                               children: [
-                                // Emerald Gradient
+                                // Emerald Background
                                 Container(
                                   decoration: const BoxDecoration(
-                                    gradient: AppColors.lightEmeraldGradient,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                                 // Organic Shapes & Mountain Silhouettes (Layered Artwork)
@@ -121,12 +121,7 @@ class _ProfileViewState extends State<ProfileView> {
                                     height: 250,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      gradient: RadialGradient(
-                                        colors: [
-                                          Colors.white.withValues(alpha: 0.1),
-                                          Colors.transparent,
-                                        ],
-                                      ),
+                                      color: Colors.white.withValues(alpha: 0.06),
                                     ),
                                   ),
                                 ),
@@ -152,7 +147,7 @@ class _ProfileViewState extends State<ProfileView> {
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.lightAccentEmerald.withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(alpha: 0.15),
                                           blurRadius: 40,
                                           spreadRadius: 20,
                                         ),
@@ -415,12 +410,7 @@ class _ProfileViewState extends State<ProfileView> {
             height: 400,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.lightPrimaryEmerald.withValues(alpha: 0.05),
-                  Colors.transparent,
-                ],
-              ),
+              color: AppColors.primary.withValues(alpha: 0.03),
             ),
           ),
         ),
@@ -432,12 +422,7 @@ class _ProfileViewState extends State<ProfileView> {
             height: 500,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppColors.lightAccentEmerald.withValues(alpha: 0.08),
-                  Colors.transparent,
-                ],
-              ),
+              color: AppColors.accent.withValues(alpha: 0.03),
             ),
           ),
         ),
@@ -597,7 +582,7 @@ class _ProfileViewState extends State<ProfileView> {
                 height: 48,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  gradient: AppColors.lightEmeraldGradient,
+                  color: AppColors.primary,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [
                     BoxShadow(

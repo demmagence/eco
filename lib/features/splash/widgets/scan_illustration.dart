@@ -45,11 +45,7 @@ class _ScanIllustrationState extends State<ScanIllustration>
           padding: const EdgeInsets.all(_framePadding),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF11543F), Color(0xFF0B3B2C)],
-            ),
+            color: const Color(0xFF0E2B44),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.25),
@@ -85,16 +81,10 @@ class _ScanIllustrationState extends State<ScanIllustration>
                       child: Container(
                         height: 3,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              Colors.transparent,
-                              Color(0xFFCFFF6B),
-                              Colors.transparent,
-                            ],
-                          ),
+                          color: const Color(0xFFA0C878),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFCFFF6B).withValues(alpha: 0.6),
+                              color: const Color(0xFFA0C878).withValues(alpha: 0.6),
                               blurRadius: 8,
                             ),
                           ],
@@ -128,13 +118,13 @@ class _ScanIllustrationState extends State<ScanIllustration>
           shape: BoxShape.circle,
           color: Color.lerp(
             Colors.white.withValues(alpha: 0.35),
-            const Color(0xFFCFFF6B),
+            const Color(0xFFA0C878),
             glow,
           ),
           boxShadow: glow > 0.3
               ? [
                   BoxShadow(
-                    color: const Color(0xFFCFFF6B).withValues(alpha: glow * 0.7),
+                    color: const Color(0xFFA0C878).withValues(alpha: glow * 0.7),
                     blurRadius: 8,
                   ),
                 ]
@@ -179,7 +169,7 @@ class _Landscape extends StatelessWidget {
             height: 26,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFFCFFF6B).withValues(alpha: 0.85),
+              color: const Color(0xFFA0C878).withValues(alpha: 0.85),
             ),
           ),
         ),
@@ -190,7 +180,7 @@ class _Landscape extends StatelessWidget {
             width: 180,
             height: 100,
             decoration: BoxDecoration(
-              color: const Color(0xFF1B6B4E).withValues(alpha: 0.8),
+              color: const Color(0xFF27667B).withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(90),
             ),
           ),
@@ -202,7 +192,7 @@ class _Landscape extends StatelessWidget {
             width: 200,
             height: 110,
             decoration: BoxDecoration(
-              color: const Color(0xFF14573F),
+              color: const Color(0xFF143D60),
               borderRadius: BorderRadius.circular(100),
             ),
           ),
