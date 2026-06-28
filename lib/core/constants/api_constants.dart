@@ -7,7 +7,7 @@ class ApiConstants {
 
   // Gemini AI (image analysis, daily tip, news)
   static const String geminiApiKey = 'YOUR_GEMINI_API_KEY';
-  static const String geminiModel = 'gemini-1.5-flash';
+  static const String geminiModel = 'gemini-2.0-flash';
 
   // Groq AI (Eco Assistant chatbot) — OpenAI-compatible chat completions
   static const String groqApiKey =
