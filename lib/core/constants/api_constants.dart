@@ -2,7 +2,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Backend API (Node.js Deployed Server on Vercel)
-  static const String apiBaseUrl = 'https://eco-beta-nine.vercel.app/api';
+  static const String apiBaseUrl = 'https://eco-tan-seven.vercel.app/api';
   // For Android Emulator, use: 'http://10.0.2.2:3000/api'
 
   // Gemini AI (image analysis, daily tip, news)
