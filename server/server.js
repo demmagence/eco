@@ -25,6 +25,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'YOUR_JWT_SECRET';
 app.use(cors());
 app.use(express.json());
 
+// Create uploads directory path references
+const uploadsDir = path.join(__dirname, 'uploads');
+const avatarsDir = path.join(uploadsDir, 'avatars');
+const scansDir = path.join(uploadsDir, 'scans');
+
 // Create uploads directory if not exists (wrapped in try-catch for read-only systems like Vercel)
 try {
   [uploadsDir, avatarsDir, scansDir].forEach(dir => {
