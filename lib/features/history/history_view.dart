@@ -35,59 +35,62 @@ class _HistoryViewState extends State<HistoryView>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Tab bar
-        Container(
-          margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: TabBar(
-            controller: _tabController,
-            indicator: BoxDecoration(
-              color: AppColors.primary,
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          // Tab bar
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
               borderRadius: BorderRadius.circular(12),
             ),
-            indicatorSize: TabBarIndicatorSize.tab,
-            labelColor: Colors.white,
-            unselectedLabelColor: AppColors.onSurfaceVariant,
-            dividerColor: Colors.transparent,
-            tabs: const [
-              Tab(text: AppStrings.scanHistory),
-              Tab(text: AppStrings.chatHistory),
-            ],
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: AppColors.onSurfaceVariant,
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(text: AppStrings.scanHistory),
+                Tab(text: AppStrings.chatHistory),
+              ],
+            ),
           ),
-        ),
 
-        // Tab content
-        Expanded(
-          child: Consumer<HistoryViewModel>(
-            builder: (context, historyVM, child) {
-              if (historyVM.isLoading) {
-                return const LoadingIndicator();
-              }
+          // Tab content
+          Expanded(
+            child: Consumer<HistoryViewModel>(
+              builder: (context, historyVM, child) {
+                if (historyVM.isLoading) {
+                  return const LoadingIndicator();
+                }
 
-              return TabBarView(
-                controller: _tabController,
-                children: [
-                  ScanHistoryTab(
-                    scans: historyVM.scanHistory,
-                    onDelete: historyVM.deleteScan,
-                    onRefresh: historyVM.refresh,
-                  ),
-                  ChatHistoryTab(
-                    sessions: historyVM.chatSessions,
-                    onDelete: historyVM.deleteChatSession,
-                    onRefresh: historyVM.refresh,
-                  ),
-                ],
-              );
-            },
+                return TabBarView(
+                  controller: _tabController,
+                  children: [
+                    ScanHistoryTab(
+                      scans: historyVM.scanHistory,
+                      onDelete: historyVM.deleteScan,
+                      onRefresh: historyVM.refresh,
+                    ),
+                    ChatHistoryTab(
+                      sessions: historyVM.chatSessions,
+                      onDelete: historyVM.deleteChatSession,
+                      onRefresh: historyVM.refresh,
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

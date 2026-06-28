@@ -115,7 +115,7 @@ class _CameraViewState extends State<CameraView> {
 
             // Top: mode selector
             Positioned(
-              top: 16,
+              top: MediaQuery.of(context).padding.top + 16,
               left: 16,
               right: 16,
               child: _buildModeSelector(),
@@ -123,7 +123,7 @@ class _CameraViewState extends State<CameraView> {
 
             // Top hint text
             Positioned(
-              top: 80,
+              top: MediaQuery.of(context).padding.top + 80,
               left: 0,
               right: 0,
               child: Center(
@@ -150,7 +150,7 @@ class _CameraViewState extends State<CameraView> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(32, 24, 32, 40),
+                padding: EdgeInsets.fromLTRB(32, 24, 32, MediaQuery.of(context).padding.bottom + 100),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,

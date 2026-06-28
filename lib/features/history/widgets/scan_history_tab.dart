@@ -45,7 +45,7 @@ class ScanHistoryTab extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         itemCount: scans.length,
         itemBuilder: (context, index) {
           final scan = scans[index];

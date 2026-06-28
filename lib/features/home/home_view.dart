@@ -31,7 +31,7 @@ class HomeView extends StatelessWidget {
             ),
             bottomNavigationBar: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                 child: _FloatingBottomBar(
                   currentIndex: homeVM.currentIndex,
                   onTap: (index) {

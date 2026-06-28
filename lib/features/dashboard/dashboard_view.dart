@@ -77,7 +77,7 @@ class _DashboardViewState extends State<DashboardView> {
               backgroundColor: AppColors.lightCardBackground,
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 children: [
                   // Custom App Bar
                   DashboardAppBar(
@@ -168,7 +168,7 @@ class _DashboardViewState extends State<DashboardView> {
                     ],
                   ).animate().fadeIn(duration: 400.ms, delay: 200.ms).slideY(begin: 0.05, end: 0),
 
-                  const SizedBox(height: 80), // extra padding for floating navigation bar
+                  const SizedBox(height: 100), // extra padding for floating navigation bar
                 ],
               ),
             ),
