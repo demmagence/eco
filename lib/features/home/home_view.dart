@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:eco/core/constants/app_colors.dart';
-import 'package:eco/core/constants/app_strings.dart';
 import 'package:eco/features/home/home_viewmodel.dart';
 import 'package:eco/features/history/history_viewmodel.dart';
 import 'package:eco/features/dashboard/dashboard_view.dart';
@@ -45,8 +44,7 @@ class HomeView extends StatelessWidget {
   }
 }
 
-/// Standard anchored bottom navigation bar — NOT floating.
-/// Flush against screen edges with only top-left and top-right rounded corners.
+/// Standard anchored bottom navigation bar with a floating center camera button.
 class _AnchoredBottomBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -58,48 +56,64 @@ class _AnchoredBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Dashboard Tab
-              _NavBarItem(
-                icon: Icons.dashboard_outlined,
-                activeIcon: Icons.dashboard,
-                label: AppStrings.dashboard,
-                isSelected: currentIndex == 0,
-                onTap: () => onTap(0),
-              ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Navbar Background Container
+        Container(
+          decoration: const BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 64,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Home Tab
+                  _NavBarItem(
+                    icon: Icons.home_outlined,
+                    activeIcon: Icons.home,
+                    label: 'Home',
+                    isSelected: currentIndex == 0,
+                    onTap: () => onTap(0),
+                  ),
 
-              // Camera Tab (Center Button)
-              _CameraCenterButton(
-                isSelected: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
+                  // Placeholder for the floating center button
+                  const SizedBox(width: 72),
 
-              // History Tab
-              _NavBarItem(
-                icon: Icons.history_outlined,
-                activeIcon: Icons.history,
-                label: AppStrings.history,
-                isSelected: currentIndex == 2,
-                onTap: () => onTap(2),
+                  // History Tab
+                  _NavBarItem(
+                    icon: Icons.history_outlined,
+                    activeIcon: Icons.history,
+                    label: 'Riwayat',
+                    isSelected: currentIndex == 2,
+                    onTap: () => onTap(2),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        // Floating Center Camera Button
+        Positioned(
+          top: -24,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: _CameraCenterButton(
+              isSelected: currentIndex == 1,
+              onTap: () => onTap(1),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -164,16 +178,27 @@ class _CameraCenterButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.accent,
-        ),
-        child: const Icon(
-          Icons.camera_alt,
           color: Colors.white,
-          size: 24,
+          border: Border.all(
+            color: isSelected ? AppColors.accent : AppColors.primary,
+            width: 4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.camera_alt_rounded,
+          color: isSelected ? AppColors.accent : AppColors.primary,
+          size: 28,
         ),
       ),
     );
