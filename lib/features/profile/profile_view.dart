@@ -321,31 +321,33 @@ class _ProfileViewState extends State<ProfileView> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ).animate().fadeIn(duration: 400.ms, delay: 250.ms),
-                                const SizedBox(height: 16),
-                                _buildInfoCardWithWatermark(
-                                  padding: EdgeInsets.zero,
-                                  child: Column(
-                                    children: [
-                                      _buildSettingTile(
-                                        icon: Icons.notifications_outlined,
-                                        title: 'Notifikasi',
-                                        subtitle: 'Kelola preferensi pemberitahuan',
-                                      ),
-                                      const Divider(height: 1, color: AppColors.lightBorder),
-                                      _buildSettingTile(
-                                        icon: Icons.security_outlined,
-                                        title: 'Privasi',
-                                        subtitle: 'Keamanan akun dan data',
-                                      ),
-                                      const Divider(height: 1, color: AppColors.lightBorder),
-                                      _buildSettingTile(
-                                        icon: Icons.help_outline,
-                                        title: 'Pusat Bantuan',
-                                        subtitle: 'FAQ dan dukungan pelanggan',
-                                      ),
-                                    ],
-                                  ),
-                                ).animate().fadeIn(duration: 400.ms, delay: 300.ms).slideY(begin: 0.05, end: 0),
+                                              _buildInfoCardWithWatermark(
+                                    padding: EdgeInsets.zero,
+                                    child: Column(
+                                      children: [
+                                        _buildSettingTile(
+                                          icon: Icons.notifications_outlined,
+                                          title: 'Notifikasi',
+                                          subtitle: 'Kelola preferensi pemberitahuan',
+                                          onTap: () => _showNotificationSettings(context),
+                                        ),
+                                        const Divider(height: 1, color: AppColors.lightBorder),
+                                        _buildSettingTile(
+                                          icon: Icons.security_outlined,
+                                          title: 'Privasi',
+                                          subtitle: 'Keamanan akun dan data',
+                                          onTap: () => _showPrivacySettings(context),
+                                        ),
+                                        const Divider(height: 1, color: AppColors.lightBorder),
+                                        _buildSettingTile(
+                                          icon: Icons.help_outline,
+                                          title: 'Pusat Bantuan',
+                                          subtitle: 'FAQ dan dukungan pelanggan',
+                                          onTap: () => _showHelpCenter(context),
+                                        ),
+                                      ],
+                                    ),
+                                  ).animate().fadeIn(duration: 400.ms, delay: 300.ms).slideY(begin: 0.05, end: 0),
 
                                 const SizedBox(height: 48),
 
@@ -599,7 +601,12 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildSettingTile({required IconData icon, required String title, required String subtitle}) {
+  Widget _buildSettingTile({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       leading: Container(
@@ -626,7 +633,7 @@ class _ProfileViewState extends State<ProfileView> {
         ),
       ),
       trailing: const Icon(Icons.chevron_right, color: AppColors.lightTextMuted),
-      onTap: () {},
+      onTap: onTap,
     );
   }
 
@@ -651,6 +658,553 @@ class _ProfileViewState extends State<ProfileView> {
           }
         },
       ),
+    );
+  }
+
+  void _showNotificationSettings(BuildContext context) {
+    bool airQuality = true;
+    bool dailyTips = true;
+    bool activityReminder = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.lightCardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                top: 12,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightTextMuted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Pengaturan Notifikasi',
+                    style: TextStyle(
+                      color: AppColors.lightTextPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Kelola bagaimana dan kapan VibEco mengirimkan pemberitahuan ke perangkat Anda.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.lightTextSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SwitchListTile(
+                    title: const Text(
+                      'Kualitas Udara Buruk',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Dapatkan peringatan instan saat kualitas udara di lokasi Anda memburuk.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: airQuality,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => airQuality = val);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.lightBorder),
+                  SwitchListTile(
+                    title: const Text(
+                      'Tips Harian',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Terima tips ramah lingkungan harian untuk mendukung gaya hidup hijau.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: dailyTips,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => dailyTips = val);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.lightBorder),
+                  SwitchListTile(
+                    title: const Text(
+                      'Pengingat Aktivitas',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Pengingat rutin untuk memindai lingkungan sekitar Anda.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: activityReminder,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => activityReminder = val);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Pengaturan notifikasi disimpan'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.lightPrimaryEmerald,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Simpan',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showPrivacySettings(BuildContext context) {
+    bool shareData = true;
+    bool preciseLocation = true;
+    bool publicHistory = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.lightCardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                top: 12,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightTextMuted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Pengaturan Privasi',
+                    style: TextStyle(
+                      color: AppColors.lightTextPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Kontrol bagaimana data Anda digunakan untuk meningkatkan pengalaman VibEco.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.lightTextSecondary,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SwitchListTile(
+                    title: const Text(
+                      'Bagikan Data Lingkungan',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Bantu memetakan kondisi lingkungan secara anonim bersama komunitas.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: shareData,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => shareData = val);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.lightBorder),
+                  SwitchListTile(
+                    title: const Text(
+                      'Lokasi Presisi',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Gunakan GPS presisi untuk mendapatkan data AQI dan cuaca yang sangat akurat.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: preciseLocation,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => preciseLocation = val);
+                    },
+                  ),
+                  const Divider(height: 1, indent: 24, endIndent: 24, color: AppColors.lightBorder),
+                  SwitchListTile(
+                    title: const Text(
+                      'Riwayat Deteksi Publik',
+                      style: TextStyle(
+                        color: AppColors.lightTextPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Izinkan pengguna lain melihat kontribusi dan riwayat scan lingkungan Anda.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    value: publicHistory,
+                    activeThumbColor: AppColors.lightPrimaryEmerald,
+                    activeTrackColor: AppColors.lightPrimaryEmerald.withValues(alpha: 0.2),
+                    onChanged: (val) {
+                      setModalState(() => publicHistory = val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ListTile(
+                    leading: const Icon(Icons.delete_forever_outlined, color: AppColors.lightDanger),
+                    title: const Text(
+                      'Hapus Seluruh Riwayat',
+                      style: TextStyle(
+                        color: AppColors.lightDanger,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Tindakan ini permanen dan akan menghapus seluruh data scan Anda.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    onTap: () {
+                      _showDeleteHistoryConfirmation(context);
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Pengaturan privasi disimpan'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.lightPrimaryEmerald,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Simpan',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showDeleteHistoryConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: AppColors.lightCardBackground,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            'Hapus Seluruh Riwayat?',
+            style: TextStyle(
+              color: AppColors.lightTextPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'Apakah Anda yakin ingin menghapus seluruh riwayat scan? Tindakan ini tidak dapat dibatalkan.',
+            style: TextStyle(color: AppColors.lightTextSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text(
+                'Batal',
+                style: TextStyle(color: AppColors.lightTextSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext); // Close dialog
+                Navigator.pop(context); // Close bottom sheet
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Seluruh riwayat berhasil dihapus'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              child: const Text(
+                'Hapus',
+                style: TextStyle(
+                  color: AppColors.lightDanger,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showHelpCenter(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.lightCardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.lightTextMuted.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Pusat Bantuan',
+                    style: TextStyle(
+                      color: AppColors.lightTextPrimary,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      children: const [
+                        Text(
+                          'Pertanyaan Sering Diajukan (FAQ)',
+                          style: TextStyle(
+                            color: AppColors.lightTextPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        ExpansionTile(
+                          title: Text(
+                            'Bagaimana cara kerja deteksi AI?',
+                            style: TextStyle(
+                              color: AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                'VibEco menggunakan kamera dan teknologi AI canggih untuk menganalisis jenis sampah atau kondisi lingkungan di sekitar Anda, memberikan saran daur ulang secara instan.',
+                                style: TextStyle(
+                                  color: AppColors.lightTextSecondary,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          title: Text(
+                            'Mengapa data kualitas air tidak muncul?',
+                            style: TextStyle(
+                              color: AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                'Pastikan izin lokasi presisi Anda telah diaktifkan dan perangkat Anda terhubung ke internet.',
+                                style: TextStyle(
+                                  color: AppColors.lightTextSecondary,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        ExpansionTile(
+                          title: Text(
+                            'Apakah aplikasi ini gratis?',
+                            style: TextStyle(
+                              color: AppColors.lightTextPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(16),
+                              child: Text(
+                                'Ya, seluruh fitur utama VibEco seperti deteksi sampah, pemantauan kualitas udara, dan asisten AI gratis digunakan untuk mendukung gaya hidup ramah lingkungan.',
+                                style: TextStyle(
+                                  color: AppColors.lightTextSecondary,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Menghubungi Dukungan VibEco via Email...'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.mail_outline),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.lightPrimaryEmerald,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        label: const Text(
+                          'Hubungi Dukungan Pelanggan',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
