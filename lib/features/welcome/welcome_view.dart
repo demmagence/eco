@@ -93,7 +93,7 @@ class _WelcomeViewState extends State<WelcomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _currentPage == 0 ? AppColors.primary : AppColors.background,
+      backgroundColor: _currentPage == 0 ? const Color(0xFF6B7D3E) : AppColors.background,
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(), // Disable swipe, button-only navigation
@@ -114,63 +114,78 @@ class _WelcomeViewState extends State<WelcomeView> {
 
   // ─── PAGE 0: START PAGE ("SAVE THE PLANET") ──────────────────────────────────
   Widget _buildStartPage() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          children: [
-            const Spacer(),
-            // Leaf Icon
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.eco_rounded,
-                color: Colors.white,
-                size: 64,
-              ),
-            ),
-            const SizedBox(height: 32),
-            // Title
-            const Text(
-              'SAVE\nTHE\nPLANET',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 48,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 4,
-                height: 1.1,
-              ),
-            ),
-            const Spacer(),
-            // Start Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _nextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFF6B7D3E), // Olive green matching reference
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Column(
+            children: [
+              const Spacer(),
+              // Leaf Icon
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
                 ),
-                child: const Text(
-                  'Start',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
+                child: const Icon(
+                  Icons.eco_rounded,
+                  color: Colors.white,
+                  size: 56,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 40),
+              // Title
+              const Text(
+                'Clean Earth,\nBetter Future',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Deteksi, analisis, dan kelola limbah untuk lingkungan yang lebih bersih.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.75),
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              const Spacer(),
+              // Start Button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _nextPage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF6B7D3E),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Mulai',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -357,7 +372,12 @@ class _WelcomeViewState extends State<WelcomeView> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
+
+                // Segmented Tab Selector
+                _buildAuthTabSelector(authVM),
+
+                const SizedBox(height: 24),
 
                 // Active Form
                 AnimatedSwitcher(
@@ -369,6 +389,70 @@ class _WelcomeViewState extends State<WelcomeView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildAuthTabSelector(AuthViewModel authVM) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _activeAuthTab = 0;
+                authVM.clearError();
+              }),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: _activeAuthTab == 0 ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Masuk',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _activeAuthTab == 0 ? Colors.white : AppColors.textSecondary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() {
+                _activeAuthTab = 1;
+                authVM.clearError();
+              }),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: _activeAuthTab == 1 ? AppColors.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Daftar',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: _activeAuthTab == 1 ? Colors.white : AppColors.textSecondary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

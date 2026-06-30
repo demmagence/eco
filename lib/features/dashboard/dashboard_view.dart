@@ -8,6 +8,7 @@ import 'package:eco/features/auth/auth_viewmodel.dart';
 import 'package:eco/features/dashboard/dashboard_viewmodel.dart';
 import 'package:eco/features/dashboard/widgets/dashboard_app_bar.dart';
 import 'package:eco/features/dashboard/widgets/category_chips.dart';
+import 'package:eco/features/dashboard/widgets/activity_section.dart';
 import 'package:eco/features/dashboard/widgets/weather_card.dart';
 import 'package:eco/features/dashboard/widgets/aqi_card.dart';
 import 'package:eco/features/dashboard/widgets/water_quality_card.dart';
@@ -42,16 +43,16 @@ class _DashboardViewState extends State<DashboardView> {
       builder: (context, dashVM, child) {
         if (dashVM.isLoading && dashVM.weather == null) {
           return const Scaffold(
-            backgroundColor: AppColors.lightBackground, // LIGHT MODE
+            backgroundColor: AppColors.lightBackground,
             body: SafeArea(
-              child: DashboardShimmer(), // You might need to update shimmer colors too
+              child: DashboardShimmer(),
             ),
           );
         }
 
         if (dashVM.errorMessage != null && dashVM.weather == null) {
           return Scaffold(
-            backgroundColor: AppColors.lightBackground, // LIGHT MODE
+            backgroundColor: AppColors.lightBackground,
             body: SafeArea(
               child: RefreshIndicator(
                 onRefresh: dashVM.refresh,
@@ -79,7 +80,7 @@ class _DashboardViewState extends State<DashboardView> {
             dashVM.selectedCategory == DashboardCategory.ecology;
 
         return Scaffold(
-          backgroundColor: AppColors.lightBackground, // LIGHT MODE
+          backgroundColor: AppColors.lightBackground,
           body: SafeArea(
             child: RefreshIndicator(
               onRefresh: dashVM.refresh,
@@ -89,19 +90,27 @@ class _DashboardViewState extends State<DashboardView> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 children: [
-                  // Custom App Bar
+                  // Custom App Bar with Greeting
                   DashboardAppBar(
                     cityName: dashVM.cityName,
+                    userName: dashVM.userName,
                     user: user,
                     onLocationTap: dashVM.refresh,
                     onProfileTap: () {
                       final authVM = context.read<AuthViewModel>();
                       Navigator.pushNamed(context, AppRouter.profile).then((_) {
-                        // Reload user profile in case it changed
                         authVM.loadUserProfile();
                       });
                     },
                   ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0),
+
+                  const SizedBox(height: 20),
+
+                  // Aktivitas Lingkungan Section
+                  ActivitySection(
+                    totalScans: dashVM.totalScans,
+                    memberSince: user?.createdAt,
+                  ).animate().fadeIn(duration: 400.ms, delay: 100.ms).slideY(begin: 0.05, end: 0),
 
                   const SizedBox(height: 20),
 
