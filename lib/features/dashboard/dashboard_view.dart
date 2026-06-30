@@ -55,9 +55,21 @@ class _DashboardViewState extends State<DashboardView> {
           return Scaffold(
             backgroundColor: AppColors.lightBackground, // LIGHT MODE
             body: SafeArea(
-              child: AppErrorWidget(
-                message: dashVM.errorMessage!,
-                onRetry: dashVM.refresh,
+              child: RefreshIndicator(
+                onRefresh: dashVM.refresh,
+                color: AppColors.primary,
+                backgroundColor: AppColors.lightCardBackground,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height - 150,
+                    alignment: Alignment.center,
+                    child: AppErrorWidget(
+                      message: dashVM.errorMessage!,
+                      onRetry: dashVM.refresh,
+                    ),
+                  ),
+                ),
               ),
             ),
           );
