@@ -91,7 +91,6 @@ class _DashboardViewState extends State<DashboardView> {
                 children: [
                   // Custom App Bar
                   DashboardAppBar(
-                    currentTime: dashVM.currentTime,
                     cityName: dashVM.cityName,
                     user: user,
                     onLocationTap: dashVM.refresh,
