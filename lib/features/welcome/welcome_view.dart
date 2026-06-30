@@ -464,14 +464,25 @@ class _WelcomeViewState extends State<WelcomeView> {
                 authVM.clearError();
               });
             },
-            child: const Text(
-              'Belum punya akun? Daftar Sekarang',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            child: const Text.rich(
+              TextSpan(
+                text: 'Belum punya akun? ',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'Daftar Sekarang',
+                    style: TextStyle(
+                      color: AppColors.accentDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
@@ -639,14 +650,25 @@ class _WelcomeViewState extends State<WelcomeView> {
                 authVM.clearError();
               });
             },
-            child: const Text(
-              'Sudah punya akun? Login Sekarang',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+            child: const Text.rich(
+              TextSpan(
+                text: 'Sudah punya akun? ',
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'Login Sekarang',
+                    style: TextStyle(
+                      color: AppColors.accentDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],
