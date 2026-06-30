@@ -7,14 +7,12 @@ import 'package:eco/core/widgets/shimmer_loading.dart';
 import 'package:eco/features/auth/auth_viewmodel.dart';
 import 'package:eco/features/dashboard/dashboard_viewmodel.dart';
 import 'package:eco/features/dashboard/widgets/dashboard_app_bar.dart';
-import 'package:eco/features/dashboard/widgets/dashboard_search_bar.dart';
 import 'package:eco/features/dashboard/widgets/category_chips.dart';
 import 'package:eco/features/dashboard/widgets/weather_card.dart';
 import 'package:eco/features/dashboard/widgets/aqi_card.dart';
 import 'package:eco/features/dashboard/widgets/water_quality_card.dart';
 import 'package:eco/features/dashboard/widgets/waste_type_card.dart';
 import 'package:eco/features/dashboard/widgets/environmental_signal_card.dart';
-import 'package:eco/features/home/home_viewmodel.dart';
 import 'package:eco/routes/app_router.dart';
 
 class DashboardView extends StatefulWidget {
@@ -55,9 +53,21 @@ class _DashboardViewState extends State<DashboardView> {
           return Scaffold(
             backgroundColor: AppColors.lightBackground, // LIGHT MODE
             body: SafeArea(
-              child: AppErrorWidget(
-                message: dashVM.errorMessage!,
-                onRetry: dashVM.refresh,
+              child: RefreshIndicator(
+                onRefresh: dashVM.refresh,
+                color: AppColors.primary,
+                backgroundColor: AppColors.lightCardBackground,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height - 150,
+                    alignment: Alignment.center,
+                    child: AppErrorWidget(
+                      message: dashVM.errorMessage!,
+                      onRetry: dashVM.refresh,
+                    ),
+                  ),
+                ),
               ),
             ),
           );
@@ -93,34 +103,6 @@ class _DashboardViewState extends State<DashboardView> {
                       });
                     },
                   ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1, end: 0),
-
-                  const SizedBox(height: 24),
-
-                  // Search Bar with Filter
-                  DashboardSearchBar(
-                    query: dashVM.searchQuery,
-                    onChanged: dashVM.setSearchQuery,
-                    onFilterTap: () => showFilterBottomSheet(context),
-                    results: dashVM.filteredFeatures,
-                    onResultTap: (featureName) {
-                      if (featureName == 'Cuaca' || featureName == 'Kualitas Udara') {
-                        dashVM.setCategory(DashboardCategory.weather);
-                        dashVM.setSearchQuery('');
-                      } else if (featureName == 'Kualitas Air' || featureName == 'Prediksi Lingkungan') {
-                        dashVM.setCategory(DashboardCategory.ecology);
-                        dashVM.setSearchQuery('');
-                      } else if (featureName == 'Kamera') {
-                        context.read<HomeViewModel>().setIndex(1);
-                        dashVM.setSearchQuery('');
-                      } else if (featureName == 'Histori Scan') {
-                        context.read<HomeViewModel>().setIndex(2);
-                        dashVM.setSearchQuery('');
-                      } else if (featureName == 'Chatbot') {
-                        Navigator.pushNamed(context, AppRouter.chatbot);
-                        dashVM.setSearchQuery('');
-                      }
-                    },
-                  ).animate().fadeIn(duration: 400.ms, delay: 100.ms),
 
                   const SizedBox(height: 20),
 

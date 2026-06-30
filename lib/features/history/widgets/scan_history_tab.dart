@@ -20,24 +20,34 @@ class ScanHistoryTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (scans.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.document_scanner_outlined,
-              size: 64,
-              color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+      return RefreshIndicator(
+        onRefresh: onRefresh,
+        color: AppColors.primary,
+        backgroundColor: AppColors.lightCardBackground,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(context).size.height - 250,
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.document_scanner_outlined,
+                  size: 64,
+                  color: AppColors.onSurfaceVariant.withValues(alpha: 0.4),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  AppStrings.noScanHistory,
+                  style: TextStyle(
+                    color: AppColors.onSurfaceVariant,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            const Text(
-              AppStrings.noScanHistory,
-              style: TextStyle(
-                color: AppColors.onSurfaceVariant,
-                fontSize: 16,
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }

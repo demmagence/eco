@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:camera/camera.dart';
 import 'package:eco/core/constants/app_colors.dart';
 import 'package:eco/features/camera/camera_viewmodel.dart';
+import 'package:eco/features/home/home_viewmodel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CameraView extends StatefulWidget {
@@ -113,12 +114,39 @@ class _CameraViewState extends State<CameraView> {
             if (_selectedMode == 'multiple')
               _buildScanFrameOverlay(),
 
-            // Top: mode selector
+            // Top: Back button and mode selector
             Positioned(
               top: MediaQuery.of(context).padding.top + 16,
               left: 16,
               right: 16,
-              child: _buildModeSelector(),
+              child: Row(
+                children: [
+                  // Back Button
+                  GestureDetector(
+                    onTap: () {
+                      context.read<HomeViewModel>().setIndex(0); // Go back to Home/Dashboard
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Mode Selector
+                  Expanded(
+                    child: _buildModeSelector(),
+                  ),
+                ],
+              ),
             ),
 
             // Top hint text
@@ -130,7 +158,7 @@ class _CameraViewState extends State<CameraView> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -150,7 +178,7 @@ class _CameraViewState extends State<CameraView> {
               left: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.fromLTRB(32, 24, 32, MediaQuery.of(context).padding.bottom + 100),
+                padding: EdgeInsets.fromLTRB(32, 24, 32, MediaQuery.of(context).padding.bottom + 56),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
