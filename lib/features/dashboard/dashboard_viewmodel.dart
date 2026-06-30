@@ -34,13 +34,11 @@ class DashboardViewModel extends ChangeNotifier {
 
   // ── New state ───────────────────────────────────────────────────────
   String _cityName = '';
-  String _currentTime = '';
   DashboardCategory _selectedCategory = DashboardCategory.all;
   String _searchQuery = '';
   WaterQualityModel? _waterQuality;
   WasteTypeModel? _wasteType;
   List<EnvironmentalSignalModel> _environmentalSignals = [];
-  Timer? _clockTimer;
 
   DashboardViewModel({
     WeatherRepository? weatherRepository,
@@ -50,9 +48,7 @@ class DashboardViewModel extends ChangeNotifier {
   })  : _weatherRepository = weatherRepository ?? WeatherRepository(),
         _geminiRepository = geminiRepository ?? GeminiRepository(),
         _scanRepository = scanRepository ?? ScanRepository(),
-        _locationService = locationService ?? LocationService() {
-    _startClock();
-  }
+        _locationService = locationService ?? LocationService();
 
   // ── Getters ─────────────────────────────────────────────────────────
   WeatherModel? get weather => _weather;
@@ -67,7 +63,7 @@ class DashboardViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String get userName => _userName;
   String get cityName => _cityName;
-  String get currentTime => _currentTime;
+
   DashboardCategory get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
   WaterQualityModel? get waterQuality => _waterQuality;
@@ -117,21 +113,7 @@ class DashboardViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ── Clock ───────────────────────────────────────────────────────────
-  void _startClock() {
-    _updateTime();
-    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _updateTime();
-    });
-  }
 
-  void _updateTime() {
-    final now = DateTime.now();
-    final h = now.hour.toString().padLeft(2, '0');
-    final m = now.minute.toString().padLeft(2, '0');
-    _currentTime = '$h:$m';
-    notifyListeners();
-  }
 
   // ── Data loading ────────────────────────────────────────────────────
 
@@ -295,11 +277,5 @@ class DashboardViewModel extends ChangeNotifier {
   /// Refresh dashboard data
   Future<void> refresh() async {
     await loadDashboard();
-  }
-
-  @override
-  void dispose() {
-    _clockTimer?.cancel();
-    super.dispose();
   }
 }

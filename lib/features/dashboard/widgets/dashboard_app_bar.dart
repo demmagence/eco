@@ -7,7 +7,6 @@ import 'package:eco/data/models/user_model.dart';
 /// Custom AppBar for the Dashboard — Light Mode
 /// Left = clock + city, Right = avatar + name + @username.
 class DashboardAppBar extends StatelessWidget {
-  final String currentTime;
   final String cityName;
   final UserModel? user;
   final VoidCallback? onLocationTap;
@@ -15,7 +14,6 @@ class DashboardAppBar extends StatelessWidget {
 
   const DashboardAppBar({
     super.key,
-    required this.currentTime,
     required this.cityName,
     this.user,
     this.onLocationTap,
@@ -29,7 +27,7 @@ class DashboardAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // ── Left: Clock + Location ──
+          // ── Left: Location ──
           Expanded(
             child: GestureDetector(
               onTap: () {
@@ -39,17 +37,6 @@ class DashboardAppBar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    currentTime,
-                    style: const TextStyle(
-                      color: AppColors.lightTextMuted,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
                   Row(
                     children: [
                       Icon(
