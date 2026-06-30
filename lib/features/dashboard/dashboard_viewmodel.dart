@@ -179,6 +179,14 @@ class DashboardViewModel extends ChangeNotifier {
           ]);
           _weather = weatherResults[0] as WeatherModel;
           _aqi = weatherResults[1] as AqiModel;
+
+          // Override mock city name with actual GPS-detected city name
+          if (_weather != null &&
+              (_weather!.cityName == 'Jakarta' ||
+                  _weather!.cityName.contains('Demo') ||
+                  _weather!.cityName.contains('Offline'))) {
+            _weather = _weather!.copyWith(cityName: _cityName);
+          }
         } catch (weatherErr) {
           debugPrint('Weather or AQI load failed: $weatherErr');
           _weather = null;

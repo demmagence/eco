@@ -44,4 +44,24 @@ class WeatherModel {
       description.isNotEmpty
           ? description[0].toUpperCase() + description.substring(1)
           : '';
+
+  WeatherModel copyWith({
+    double? temperature,
+    double? feelsLike,
+    int? humidity,
+    double? windSpeed,
+    String? description,
+    String? icon,
+    String? cityName,
+  }) {
+    return WeatherModel(
+      temperature: temperature ?? this.temperature,
+      feelsLike: feelsLike ?? this.feelsLike,
+      humidity: humidity ?? this.humidity,
+      windSpeed: windSpeed ?? this.windSpeed,
+      description: description ?? this.description,
+      icon: icon ?? this.icon,
+      cityName: cityName ?? this.cityName,
+    );
+  }
 }
