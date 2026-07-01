@@ -17,15 +17,24 @@ class ScanRepository {
     );
 
     final body = await response.stream.toBytes();
-    final data = jsonDecode(utf8.decode(body)) as Map<String, dynamic>;
+    final bodyStr = utf8.decode(body);
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(data['error'] ?? 'Gagal mengunggah gambar scan.');
+      try {
+        final data = jsonDecode(bodyStr) as Map<String, dynamic>;
+        throw Exception(data['error'] ?? 'Gagal mengunggah gambar scan.');
+      } catch (e) {
+        throw Exception('Server error (${response.statusCode}): Tanggapan server tidak valid.');
+      }
     }
 
-    final relativePath = data['image_url'] as String;
-    // Return a full accessible URL
-    return ApiService.resolveUrl(relativePath);
+    try {
+      final data = jsonDecode(bodyStr) as Map<String, dynamic>;
+      final relativePath = data['image_url'] as String;
+      return ApiService.resolveUrl(relativePath);
+    } catch (e) {
+      throw Exception('Server error (${response.statusCode}): Gagal memproses data gambar dari server.');
+    }
   }
 
   /// Save scan result to database
@@ -52,11 +61,18 @@ class ScanRepository {
     return _fromApiJson(data);
   }
 
-  /// Get all scan results for current user
   Future<List<ScanResultModel>> getScanHistory() async {
     final response = await ApiService.get('/scans');
-    final list = jsonDecode(utf8.decode(response.bodyBytes)) as List;
-    return list.map((json) => _fromApiJson(json as Map<String, dynamic>)).toList();
+    try {
+      final bodyStr = utf8.decode(response.bodyBytes);
+      if (!bodyStr.trim().startsWith('[')) {
+        throw Exception('Server error (${response.statusCode}): Tanggapan server tidak valid.');
+      }
+      final list = jsonDecode(bodyStr) as List;
+      return list.map((json) => _fromApiJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      throw Exception('Server error (${response.statusCode}): Gagal memuat riwayat scan.');
+    }
   }
 
   /// Delete scan result
@@ -64,11 +80,18 @@ class ScanRepository {
     await ApiService.delete('/scans/$id');
   }
 
-  /// Get total scan count for current user
   Future<int> getScanCount() async {
     final response = await ApiService.get('/scans/count');
-    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-    return (data['count'] as num?)?.toInt() ?? 0;
+    try {
+      final bodyStr = utf8.decode(response.bodyBytes);
+      if (!bodyStr.trim().startsWith('{')) {
+        return 0;
+      }
+      final data = jsonDecode(bodyStr) as Map<String, dynamic>;
+      return (data['count'] as num?)?.toInt() ?? 0;
+    } catch (e) {
+      return 0;
+    }
   }
 
   /// Convert API JSON (which stores contacts as a JSON string) to ScanResultModel

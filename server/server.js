@@ -26,11 +26,25 @@ app.use(cors());
 app.use(express.json());
 
 // Create uploads directory path references
-const uploadsDir = path.join(__dirname, 'uploads');
-const avatarsDir = path.join(uploadsDir, 'avatars');
-const scansDir = path.join(uploadsDir, 'scans');
+let uploadsDir = path.join(__dirname, 'uploads');
+let avatarsDir = path.join(uploadsDir, 'avatars');
+let scansDir = path.join(uploadsDir, 'scans');
 
-// Create uploads directory if not exists (wrapped in try-catch for read-only systems like Vercel)
+// If running in Vercel/serverless environments, redirect uploads to writable /tmp directory
+if (process.env.VERCEL || !fs.existsSync(__dirname) || (() => {
+  try {
+    fs.accessSync(__dirname, fs.constants.W_OK);
+    return false;
+  } catch (e) {
+    return true;
+  }
+})()) {
+  uploadsDir = path.join('/tmp', 'uploads');
+  avatarsDir = path.join(uploadsDir, 'avatars');
+  scansDir = path.join(uploadsDir, 'scans');
+}
+
+// Create uploads directory if not exists
 try {
   [uploadsDir, avatarsDir, scansDir].forEach(dir => {
     if (!fs.existsSync(dir)) {
@@ -38,7 +52,7 @@ try {
     }
   });
 } catch (e) {
-  console.warn('Warning: Gagal membuat folder upload (lingkungan read-only seperti Vercel):', e.message);
+  console.warn('Warning: Gagal membuat folder upload:', e.message);
 }
 
 // Serve uploaded files statically
