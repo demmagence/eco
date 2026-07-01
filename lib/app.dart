@@ -8,7 +8,7 @@ class EcoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'VibEco',
+      title: 'Eco',
       theme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
       initialRoute: AppRouter.splash,

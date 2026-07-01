@@ -600,7 +600,7 @@ class _WelcomeViewState extends State<WelcomeView> {
 
           // Terms and Conditions Notice
           const Text(
-            'Dengan mendaftar, Anda menyetujui Ketentuan Layanan dan Kebijakan Privasi VibEco.',
+            'Dengan mendaftar, Anda menyetujui Ketentuan Layanan dan Kebijakan Privasi Eco.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,

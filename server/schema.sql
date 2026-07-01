@@ -1,4 +1,4 @@
--- MySQL database schema for VibEco App
+-- MySQL database schema for Eco App
 CREATE DATABASE IF NOT EXISTS eco_db;
 USE eco_db;
 

@@ -2,7 +2,7 @@ class AppStrings {
   AppStrings._();
 
   // App
-  static const String appName = 'VibEco';
+  static const String appName = 'Eco';
   static const String appTagline = 'Melihat dampak masa depan dari tindakan hari ini';
 
   // Auth
