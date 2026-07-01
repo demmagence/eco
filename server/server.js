@@ -131,29 +131,51 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// Multer Storage Configuration for Avatar
-const avatarStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, avatarsDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    cb(null, `avatar_${req.user.id}_${Date.now()}${ext}`);
-  }
-});
-const uploadAvatar = multer({ storage: avatarStorage });
+// In-memory file storage for serverless environments (like Vercel)
+const inMemoryUploads = new Map();
 
-// Multer Storage Configuration for Scan Images
-const scanStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, scansDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    cb(null, `scan_${uuidv4()}${ext}`);
+// Helper to determine if we should use memory storage
+const useMemoryStorage = process.env.VERCEL || (() => {
+  try {
+    fs.accessSync(__dirname, fs.constants.W_OK);
+    return false;
+  } catch (e) {
+    return true;
   }
-});
-const uploadScan = multer({ storage: scanStorage });
+})();
+
+let uploadAvatar;
+let uploadScan;
+
+if (useMemoryStorage) {
+  const memStorage = multer.memoryStorage();
+  uploadAvatar = multer({ storage: memStorage });
+  uploadScan = multer({ storage: memStorage });
+} else {
+  // Multer Storage Configuration for Avatar
+  const avatarStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, avatarsDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname) || '.jpg';
+      cb(null, `avatar_${req.user.id}_${Date.now()}${ext}`);
+    }
+  });
+  uploadAvatar = multer({ storage: avatarStorage });
+
+  // Multer Storage Configuration for Scan Images
+  const scanStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, scansDir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname) || '.jpg';
+      cb(null, `scan_${uuidv4()}${ext}`);
+    }
+  });
+  uploadScan = multer({ storage: scanStorage });
+}
 
 // ==========================================
 // ── AUTH ENDPOINTS ────────────────────────
@@ -306,17 +328,34 @@ app.post('/api/profile/avatar', checkDb, authenticateToken, uploadAvatar.single(
     if (users.length > 0 && users[0].photo_url) {
       const oldPath = path.join(__dirname, users[0].photo_url);
       if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (e) {
+          console.warn('Failed to delete old avatar file:', e.message);
+        }
       }
     }
 
-    // Save relative path to DB
-    const relativePath = `uploads/avatars/${req.file.filename}`;
+    // Save path (either physical disk or memory routing path)
+    let relativePath;
+    if (useMemoryStorage) {
+      const ext = path.extname(req.file.originalname) || '.jpg';
+      const filename = `avatar_${req.user.id}_${Date.now()}${ext}`;
+      inMemoryUploads.set(filename, {
+        buffer: req.file.buffer,
+        mimeType: req.file.mimetype || 'image/jpeg'
+      });
+      relativePath = `uploads/avatars/${filename}`;
+    } else {
+      relativePath = `uploads/avatars/${req.file.filename}`;
+    }
+
     await pool.query('UPDATE users SET photo_url = ? WHERE id = ?', [relativePath, req.user.id]);
 
     const [updatedUser] = await pool.query('SELECT id, username, display_name, email, photo_url, created_at FROM users WHERE id = ?', [req.user.id]);
     res.json(updatedUser[0]);
   } catch (error) {
+    console.error('Avatar upload error:', error);
     res.status(500).json({ error: 'Gagal mengunggah foto profil.' });
   }
 });
@@ -350,7 +389,20 @@ app.post('/api/scans/upload', checkDb, authenticateToken, uploadScan.single('ima
   if (!req.file) {
     return res.status(400).json({ error: 'Pilih file gambar untuk diunggah.' });
   }
-  const relativePath = `uploads/scans/${req.file.filename}`;
+  
+  let relativePath;
+  if (useMemoryStorage) {
+    const ext = path.extname(req.file.originalname) || '.jpg';
+    const filename = `scan_${uuidv4()}${ext}`;
+    inMemoryUploads.set(filename, {
+      buffer: req.file.buffer,
+      mimeType: req.file.mimetype || 'image/jpeg'
+    });
+    relativePath = `uploads/scans/${filename}`;
+  } else {
+    relativePath = `uploads/scans/${req.file.filename}`;
+  }
+  
   res.json({ image_url: relativePath });
 });
 
@@ -599,6 +651,41 @@ app.get('/api/chat/sessions/count', checkDb, authenticateToken, async (req, res)
   } catch (error) {
     res.status(500).json({ error: 'Gagal memuat statistik chat.' });
   }
+});
+
+// Serve memory files if memory storage is used
+app.get('/uploads/scans/:filename', (req, res) => {
+  const file = inMemoryUploads.get(req.params.filename);
+  if (file) {
+    res.setHeader('Content-Type', file.mimeType || 'image/jpeg');
+    return res.send(file.buffer);
+  }
+  // Fallback to disk
+  const filePath = path.join(scansDir, req.params.filename);
+  if (fs.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+  res.status(404).send('File tidak ditemukan.');
+});
+
+app.get('/uploads/avatars/:filename', (req, res) => {
+  const file = inMemoryUploads.get(req.params.filename);
+  if (file) {
+    res.setHeader('Content-Type', file.mimeType || 'image/jpeg');
+    return res.send(file.buffer);
+  }
+  // Fallback to disk
+  const filePath = path.join(avatarsDir, req.params.filename);
+  if (fs.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+  res.status(404).send('File tidak ditemukan.');
+});
+
+// Global error handling middleware to ensure JSON is returned instead of HTML error pages
+app.use((err, req, res, next) => {
+  console.error('Express Error Handler:', err);
+  res.status(500).json({ error: err.message || 'Terjadi kesalahan internal server.' });
 });
 
 // Export app for Vercel
