@@ -705,7 +705,7 @@ class _ProfileViewState extends State<ProfileView> {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Kelola bagaimana dan kapan VibEco mengirimkan pemberitahuan ke perangkat Anda.',
+                      'Kelola bagaimana dan kapan Eco mengirimkan pemberitahuan ke perangkat Anda.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.lightTextSecondary,
@@ -863,7 +863,7 @@ class _ProfileViewState extends State<ProfileView> {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
                     child: Text(
-                      'Kontrol bagaimana data Anda digunakan untuk meningkatkan pengalaman VibEco.',
+                      'Kontrol bagaimana data Anda digunakan untuk meningkatkan pengalaman Eco.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.lightTextSecondary,
@@ -1110,7 +1110,7 @@ class _ProfileViewState extends State<ProfileView> {
                             Padding(
                               padding: EdgeInsets.all(16),
                               child: Text(
-                                'VibEco menggunakan kamera dan teknologi AI canggih untuk menganalisis jenis sampah atau kondisi lingkungan di sekitar Anda, memberikan saran daur ulang secara instan.',
+                                'Eco menggunakan kamera dan teknologi AI canggih untuk menganalisis jenis sampah atau kondisi lingkungan di sekitar Anda, memberikan saran daur ulang secara instan.',
                                 style: TextStyle(
                                   color: AppColors.lightTextSecondary,
                                   height: 1.5,
@@ -1152,7 +1152,7 @@ class _ProfileViewState extends State<ProfileView> {
                             Padding(
                               padding: EdgeInsets.all(16),
                               child: Text(
-                                'Ya, seluruh fitur utama VibEco seperti deteksi sampah, pemantauan kualitas udara, dan asisten AI gratis digunakan untuk mendukung gaya hidup ramah lingkungan.',
+                                'Ya, seluruh fitur utama Eco seperti deteksi sampah, pemantauan kualitas udara, dan asisten AI gratis digunakan untuk mendukung gaya hidup ramah lingkungan.',
                                 style: TextStyle(
                                   color: AppColors.lightTextSecondary,
                                   height: 1.5,
@@ -1175,7 +1175,7 @@ class _ProfileViewState extends State<ProfileView> {
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content: Text('Menghubungi Dukungan VibEco via Email...'),
+                              content: Text('Menghubungi Dukungan Eco via Email...'),
                               behavior: SnackBarBehavior.floating,
                             ),
                           );

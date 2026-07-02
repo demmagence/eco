@@ -1,4 +1,4 @@
-# VibEco 🌿
+# Eco 🌿
 
 A Flutter-based eco-friendly app featuring waste scanning, AI chatbot, weather monitoring, and environmental insights. It features a premium, minimalist light-mode design system with a clean, gradient-free interface.
 
