@@ -161,6 +161,14 @@ class ChatbotViewModel extends ChangeNotifier {
     // Save user message
     try {
       await _chatRepository.saveMessage(userMsg);
+      
+      // Update session title from first user message immediately
+      if (_messages.where((m) => m.isUser).length == 1) {
+        final title =
+            text.length > 40 ? '${text.substring(0, 40)}...' : text;
+        await _chatRepository.updateSessionTitle(_session!.id, title);
+        _session = _session!.copyWith(title: title);
+      }
     } catch (_) {}
 
     // Get AI response
@@ -178,13 +186,6 @@ class ChatbotViewModel extends ChangeNotifier {
 
       // Save AI message
       await _chatRepository.saveMessage(aiMsg);
-
-      // Update session title from first user message
-      if (_messages.where((m) => m.isUser).length == 1) {
-        final title =
-            text.length > 50 ? '${text.substring(0, 50)}...' : text;
-        await _chatRepository.updateSessionTitle(_session!.id, title);
-      }
 
       _isTyping = false;
       notifyListeners();
