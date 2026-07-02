@@ -16,11 +16,11 @@ class GroqService {
   GroqService({http.Client? client}) : _client = client ?? http.Client();
 
   static const String _systemPersona =
-      'Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia. '
-      'Kamu ahli dalam topik lingkungan, sampah, daur ulang, polusi, perubahan iklim, '
-      'dan cara-cara praktis untuk menjaga lingkungan. Jawab dengan ramah, informatif, '
-      'dan berikan saran yang actionable. Gunakan emoji yang relevan untuk membuat '
-      'percakapan lebih menarik.';
+      'Kamu adalah Eco Assistant, asisten AI khusus topik ramah lingkungan berbahasa Indonesia. '
+      'Tugas utamamu adalah membantu pengguna dengan informasi seputar ekologi, lingkungan, sampah, daur ulang, polusi, perubahan iklim, dan gaya hidup hijau. '
+      'ATURAN KETAT: Kamu HANYA diperbolehkan menjawab pertanyaan yang berhubungan dengan lingkungan, keberlanjutan, atau ekologi. '
+      'Jika pengguna menanyakan hal di luar topik tersebut (seperti menulis kode pemrograman, memecahkan soal matematika, sejarah umum, dll.), '
+      'kamu harus menolaknya secara sopan dan ramah, lalu jelaskan bahwa kamu hanya bisa menjawab pertanyaan seputar lingkungan/ekologi, serta ajak mereka kembali ke topik lingkungan.';
 
   /// Start (or restart) a plain chat session seeded with the Eco persona.
   void startChat() {
@@ -33,14 +33,18 @@ class GroqService {
   /// assistant can answer follow-up questions about the photo.
   void startChatWithScanContext(ScanResultModel scan) {
     final contextPrompt = '''
-Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia.
+Kamu adalah Eco Assistant, asisten AI khusus topik ramah lingkungan berbahasa Indonesia.
 Pengguna baru saja mengambil gambar dan menganalisisnya dengan AI. Berikut adalah data hasil analisis gambar tersebut:
 - Lokasi: ${scan.locationName ?? 'Tidak diketahui'}
 - Kondisi Lingkungan: ${scan.environmentCondition}
 - Prediksi Dampak: ${scan.impactPrediction}
 - Saran Penanganan: ${scan.suggestions}
 
-Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konteks gambar dan analisis di atas. Jawablah dengan ramah, informatif, dan berikan saran yang actionable dengan emoji yang relevan.
+Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konteks gambar dan analisis di atas.
+
+ATURAN KETAT: Kamu HANYA diperbolehkan menjawab pertanyaan yang berhubungan dengan lingkungan, keberlanjutan, atau ekologi.
+Jika pengguna menanyakan hal di luar topik tersebut (seperti menulis kode pemrograman, memecahkan soal matematika, sejarah umum, dll.), kamu harus menolaknya secara sopan dan ramah, lalu jelaskan bahwa kamu hanya bisa menjawab pertanyaan seputar lingkungan/ekologi, serta ajak mereka kembali ke topik lingkungan.
+Jawablah dengan ramah, informatif, dan berikan saran yang actionable dengan emoji yang relevan.
 ''';
 
     _history
