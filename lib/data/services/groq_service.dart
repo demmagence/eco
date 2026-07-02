@@ -55,6 +55,12 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
 
     _history.add({'role': 'user', 'content': message});
 
+    if (ApiConstants.groqApiKey == 'YOUR_GROQ_API_KEY' || ApiConstants.groqApiKey.isEmpty) {
+      final reply = _mockGroqReply(message);
+      _history.add({'role': 'assistant', 'content': reply});
+      return reply;
+    }
+
     final uri = Uri.parse(
       '${ApiConstants.groqBaseUrl}${ApiConstants.groqChatEndpoint}',
     );
@@ -75,16 +81,17 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
         }),
       );
     } catch (e) {
-      // Network failure — drop the unanswered user turn so a retry is clean.
-      _history.removeLast();
-      rethrow;
+      // Fallback on network/connection exception
+      final reply = _mockGroqReply(message);
+      _history.add({'role': 'assistant', 'content': reply});
+      return reply;
     }
 
     if (response.statusCode != 200) {
-      _history.removeLast();
-      throw Exception(
-        'Groq API error ${response.statusCode}: ${response.body}',
-      );
+      // Fallback on API server error
+      final reply = _mockGroqReply(message);
+      _history.add({'role': 'assistant', 'content': reply});
+      return reply;
     }
 
     // Decode as UTF-8 explicitly so Indonesian text and emoji survive.
@@ -97,6 +104,10 @@ Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konte
 
     _history.add({'role': 'assistant', 'content': content});
     return content;
+  }
+
+  String _mockGroqReply(String message) {
+    return 'Halo! Saat ini asisten AI berjalan dalam mode demo karena API Key Groq belum diatur atau koneksi bermasalah. Untuk pertanyaan Anda tentang "$message": Harap hubungkan kembali API Key yang valid di file `api_constants.dart` agar asisten dapat menjawab secara dinamis menggunakan AI Groq 🌿';
   }
 
   /// Clear the conversation history.

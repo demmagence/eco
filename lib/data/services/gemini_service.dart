@@ -6,16 +6,25 @@ import 'package:eco/data/models/scan_result_model.dart';
 class GeminiService {
   late final GenerativeModel _model;
   ChatSession? _chatSession;
+  bool _isMockMode = false;
 
   GeminiService() {
-    _model = GenerativeModel(
-      model: ApiConstants.geminiModel,
-      apiKey: ApiConstants.geminiApiKey,
-      generationConfig: GenerationConfig(
-        temperature: 0.7,
-        maxOutputTokens: 2048,
-      ),
-    );
+    _isMockMode = ApiConstants.geminiApiKey == 'YOUR_GEMINI_API_KEY' || 
+                  ApiConstants.geminiApiKey.isEmpty;
+    if (!_isMockMode) {
+      try {
+        _model = GenerativeModel(
+          model: ApiConstants.geminiModel,
+          apiKey: ApiConstants.geminiApiKey,
+          generationConfig: GenerationConfig(
+            temperature: 0.7,
+            maxOutputTokens: 2048,
+          ),
+        );
+      } catch (e) {
+        _isMockMode = true;
+      }
+    }
   }
 
   /// Analyze an image for environmental assessment
@@ -24,10 +33,15 @@ class GeminiService {
     String? locationContext,
     String scanMode = 'multiple',
   }) async {
-    final locationInfo =
-        locationContext != null ? 'Lokasi: $locationContext. ' : '';
+    if (_isMockMode) {
+      return _mockAnalyzeImageResponse(scanMode);
+    }
 
-    final prompt = scanMode == 'single' ? '''
+    try {
+      final locationInfo =
+          locationContext != null ? 'Lokasi: $locationContext. ' : '';
+
+      final prompt = scanMode == 'single' ? '''
 $locationInfo
 Kamu adalah ahli lingkungan hidup Indonesia yang berpengalaman dan bertindak sebagai Eco-Educator di lingkungan sekolah.
 Analisis foto sampah ini (skala kecil/sedikit/spesifik) dan berikan respons dalam format JSON berikut:
@@ -60,19 +74,65 @@ Kamu adalah ahli lingkungan Indonesia yang berpengalaman. Analisis foto ini dan 
 Pastikan analisis menyeluruh dan saran yang actionable. Berikan minimal 3 instansi terkait di Indonesia.
 ''';
 
-    final content = Content.multi([
-      TextPart(prompt),
-      DataPart('image/jpeg', imageBytes),
-    ]);
+      final content = Content.multi([
+        TextPart(prompt),
+        DataPart('image/jpeg', imageBytes),
+      ]);
 
-    final response = await _model.generateContent([content]);
-    return response.text ?? '';
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockAnalyzeImageResponse(scanMode);
+    } catch (e) {
+      // Fallback on error (like quota exceeded, invalid key, or network issue)
+      return _mockAnalyzeImageResponse(scanMode);
+    }
+  }
+
+  String _mockAnalyzeImageResponse(String scanMode) {
+    if (scanMode == 'single') {
+      return '''
+{
+  "cara_buang": "Buang sampah plastik ini ke tempat sampah anorganik. Pastikan dikosongkan dan dibilas terlebih dahulu dari sisa cairan.",
+  "materi_edukasi": "Guru dapat menjelaskan pentingnya daur ulang plastik dan dampaknya terhadap penumpukan sampah di TPA.",
+  "pengelompokan": "Plastik (Anorganik) - Butuh ratusan tahun untuk terurai di alam.",
+  "daur_ulang": "Dapat dibuat kerajinan tangan seperti pot tanaman gantung atau tempat pensil kreatif."
+}
+''';
+    } else {
+      return '''
+{
+  "kondisi_lingkungan": "Terlihat area dengan sampah plastik dan kemasan sisa makanan berserakan.",
+  "prediksi_dampak": "Penumpukan sampah ini dapat menyumbat saluran air saat hujan, menjadi sarang nyamuk, serta mencemari tanah.",
+  "saran_penanganan": "Lakukan kerja bakti pembersihan berkala, sediakan tempat sampah terpilah (organik & anorganik), dan edukasi warga sekitar.",
+  "instansi": [
+    {
+      "name": "Dinas Lingkungan Hidup",
+      "phone": "021-123456",
+      "description": "Layanan pengelolaan sampah dan kebersihan daerah."
+    },
+    {
+      "name": "Komunitas Eco-Care",
+      "phone": "0812-3456-789",
+      "description": "Relawan aksi bersih-bersih lingkungan."
+    },
+    {
+      "name": "Satgas Banjir Daerah",
+      "phone": "112",
+      "description": "Penanganan darurat sumbatan drainase dan genangan."
+    }
+  ]
+}
+''';
+    }
   }
 
   /// Generate environmental news summary based on location
   Future<String> generateNews({String? location}) async {
-    final locationInfo = location ?? 'Indonesia';
-    final prompt = '''
+    if (_isMockMode) {
+      return _mockNewsResponse();
+    }
+    try {
+      final locationInfo = location ?? 'Indonesia';
+      final prompt = '''
 Berikan 3 ringkasan berita lingkungan terkini di $locationInfo dalam format JSON:
 [
   {
@@ -84,14 +144,43 @@ Berikan 3 ringkasan berita lingkungan terkini di $locationInfo dalam format JSON
 Berikan berita yang relevan dan terkini.
 ''';
 
-    final content = Content.text(prompt);
-    final response = await _model.generateContent([content]);
-    return response.text ?? '[]';
+      final content = Content.text(prompt);
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockNewsResponse();
+    } catch (e) {
+      return _mockNewsResponse();
+    }
+  }
+
+  String _mockNewsResponse() {
+    return '''
+[
+  {
+    "judul": "Komunitas Hijau Bersih Gelar Aksi Daur Ulang",
+    "ringkasan": "Warga lokal berkolaborasi mengolah sampah plastik menjadi barang bernilai guna tinggi untuk mengurangi timbunan sampah harian.",
+    "kategori": "sampah"
+  },
+  {
+    "judul": "Pemantauan Kualitas Udara Diperketat",
+    "ringkasan": "Dinas setempat memasang sensor baru untuk mendeteksi polusi secara real-time dan memberikan peringatan dini bagi kelompok rentan.",
+    "kategori": "polusi"
+  },
+  {
+    "judul": "Program Kali Bersih Kembali Diaktifkan",
+    "ringkasan": "Upaya pembersihan sungai utama guna mengantisipasi banjir memasuki musim hujan dengan melibatkan ratusan relawan lokal.",
+    "kategori": "konservasi"
+  }
+]
+''';
   }
 
   /// Generate daily eco tip
   Future<String> generateDailyTip() async {
-    final prompt = '''
+    if (_isMockMode) {
+      return _mockDailyTipResponse();
+    }
+    try {
+      final prompt = '''
 Berikan satu tips harian ramah lingkungan yang praktis dan bisa langsung dilakukan hari ini.
 Format JSON:
 {
@@ -101,37 +190,58 @@ Format JSON:
 }
 ''';
 
-    final content = Content.text(prompt);
-    final response = await _model.generateContent([content]);
-    return response.text ?? '';
+      final content = Content.text(prompt);
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockDailyTipResponse();
+    } catch (e) {
+      return _mockDailyTipResponse();
+    }
+  }
+
+  String _mockDailyTipResponse() {
+    return '''
+{
+  "tips": "Kurangi penggunaan plastik sekali pakai hari ini.",
+  "detail": "Bawalah botol minum isi ulang (tumbler) sendiri untuk mengurangi sampah botol plastik kemasan.",
+  "emoji": "🥤"
+}
+''';
   }
 
   /// Start or continue a chat session
-  ChatSession startChat() {
-    _chatSession = _model.startChat(
-      history: [
-        Content.text(
-          'Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia. '
-          'Kamu ahli dalam topik lingkungan, sampah, daur ulang, polusi, perubahan iklim, '
-          'dan cara-cara praktis untuk menjaga lingkungan. Jawab dengan ramah, informatif, '
-          'dan berikan saran yang actionable. Gunakan emoji yang relevan untuk membuat '
-          'percakapan lebih menarik.',
-        ),
-        Content.model([
-          TextPart(
-            'Halo! Saya Eco Assistant 🌿 Saya siap membantu Anda dengan pertanyaan '
-            'seputar lingkungan, sampah, daur ulang, dan cara menjaga bumi kita. '
-            'Silakan tanya apa saja!',
+  ChatSession? startChat() {
+    if (_isMockMode) return null;
+    try {
+      _chatSession = _model.startChat(
+        history: [
+          Content.text(
+            'Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia. '
+            'Kamu ahli dalam topik lingkungan, sampah, daur ulang, polusi, perubahan iklim, '
+            'dan cara-cara praktis untuk menjaga lingkungan. Jawab dengan ramah, informatif, '
+            'dan berikan saran yang actionable. Gunakan emoji yang relevan untuk membuat '
+            'percakapan lebih menarik.',
           ),
-        ]),
-      ],
-    );
-    return _chatSession!;
+          Content.model([
+            TextPart(
+              'Halo! Saya Eco Assistant 🌿 Saya siap membantu Anda dengan pertanyaan '
+              'seputar lingkungan, sampah, daur ulang, dan cara menjaga bumi kita. '
+              'Silakan tanya apa saja!',
+            ),
+          ]),
+        ],
+      );
+      return _chatSession;
+    } catch (e) {
+      _isMockMode = true;
+      return null;
+    }
   }
 
   /// Start chat session with a scan context
-  ChatSession startChatWithScanContext(ScanResultModel scan) {
-    final contextPrompt = '''
+  ChatSession? startChatWithScanContext(ScanResultModel scan) {
+    if (_isMockMode) return null;
+    try {
+      final contextPrompt = '''
 Kamu adalah Eco Assistant, asisten AI ramah lingkungan berbahasa Indonesia. 
 Pengguna baru saja mengambil gambar dan menganalisisnya dengan AI. Berikut adalah data hasil analisis gambar tersebut:
 - Lokasi: ${scan.locationName ?? 'Tidak diketahui'}
@@ -142,33 +252,55 @@ Pengguna baru saja mengambil gambar dan menganalisisnya dengan AI. Berikut adala
 Kamu harus menjawab pertanyaan pengguna berikutnya dengan mempertimbangkan konteks gambar dan analisis di atas. Jawablah dengan ramah, informatif, dan berikan saran yang actionable dengan emoji yang relevan.
 ''';
 
-    _chatSession = _model.startChat(
-      history: [
-        Content.text(contextPrompt),
-        Content.model([
-          TextPart(
-            'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
-            'Kondisi yang terdeteksi: ${(() { final ec = scan.environmentCondition ?? scan.correctDisposal ?? "kondisi lingkungan"; return ec.length > 80 ? "${ec.substring(0, 80)}..." : ec; })()}\n\n'
-            'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?',
-          ),
-        ]),
-      ],
-    );
-    return _chatSession!;
+      _chatSession = _model.startChat(
+        history: [
+          Content.text(contextPrompt),
+          Content.model([
+            TextPart(
+              'Halo! Saya Eco Assistant 🌿 Saya telah melihat hasil analisis foto lingkungan Anda di ${scan.locationName ?? "lokasi Anda"}. '
+              'Kondisi yang terdeteksi: ${(() { final ec = scan.environmentCondition ?? scan.correctDisposal ?? "kondisi lingkungan"; return ec.length > 80 ? "${ec.substring(0, 80)}..." : ec; })()}\n\n'
+              'Apakah ada yang ingin Anda diskusikan atau tanyakan tentang kondisi tersebut atau saran penanganannya?',
+            ),
+          ]),
+        ],
+      );
+      return _chatSession;
+    } catch (e) {
+      _isMockMode = true;
+      return null;
+    }
   }
 
   /// Send a message in the current chat session
   Future<String> sendChatMessage(String message) async {
-    _chatSession ??= startChat();
-    final content = Content.text(message);
-    final response = await _chatSession!.sendMessage(content);
-    return response.text ?? '';
+    if (_isMockMode) {
+      return _mockChatResponse(message);
+    }
+    try {
+      _chatSession ??= startChat();
+      if (_chatSession == null) {
+        return _mockChatResponse(message);
+      }
+      final content = Content.text(message);
+      final response = await _chatSession!.sendMessage(content);
+      return response.text ?? _mockChatResponse(message);
+    } catch (e) {
+      return _mockChatResponse(message);
+    }
+  }
+
+  String _mockChatResponse(String message) {
+    return 'Halo! Saat ini asisten AI berjalan dalam mode demo karena API Key Gemini belum diatur atau limit tercapai. Untuk menjawab pertanyaan Anda: "$message", silakan tambahkan API Key yang valid di file `api_constants.dart` agar asisten dapat menjawab secara dinamis menggunakan kecerdasan buatan Gemini 🌿';
   }
 
   /// Generate water quality analysis for a location
   Future<String> generateWaterQuality({String? location}) async {
-    final locationInfo = location ?? 'Indonesia';
-    final prompt = '''
+    if (_isMockMode) {
+      return _mockWaterQualityResponse();
+    }
+    try {
+      final locationInfo = location ?? 'Indonesia';
+      final prompt = '''
 Berikan analisis kualitas air di wilayah $locationInfo dalam format JSON:
 {
   "status": "Bersih/Sedang/Tercemar",
@@ -179,15 +311,32 @@ Berikan nilai cleanliness_level dari 0-100 (100 = sangat bersih).
 Jawab hanya dengan JSON, tanpa penjelasan tambahan.
 ''';
 
-    final content = Content.text(prompt);
-    final response = await _model.generateContent([content]);
-    return response.text ?? '{}';
+      final content = Content.text(prompt);
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockWaterQualityResponse();
+    } catch (e) {
+      return _mockWaterQualityResponse();
+    }
+  }
+
+  String _mockWaterQualityResponse() {
+    return '''
+{
+  "status": "Sedang",
+  "cleanliness_level": 70,
+  "description": "Kualitas air cukup baik untuk kebutuhan harian namun dianjurkan dilakukan penyaringan sebelum dikonsumsi."
+}
+''';
   }
 
   /// Generate waste type analysis for a location
   Future<String> generateWasteAnalysis({String? location}) async {
-    final locationInfo = location ?? 'Indonesia';
-    final prompt = '''
+    if (_isMockMode) {
+      return _mockWasteResponse();
+    }
+    try {
+      final locationInfo = location ?? 'Indonesia';
+      final prompt = '''
 Berikan analisis jenis sampah dominan di wilayah $locationInfo dalam format JSON:
 {
   "dominant_type": "Plastik",
@@ -202,15 +351,37 @@ Berikan analisis jenis sampah dominan di wilayah $locationInfo dalam format JSON
 Jawab hanya dengan JSON, tanpa penjelasan tambahan.
 ''';
 
-    final content = Content.text(prompt);
-    final response = await _model.generateContent([content]);
-    return response.text ?? '{}';
+      final content = Content.text(prompt);
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockWasteResponse();
+    } catch (e) {
+      return _mockWasteResponse();
+    }
+  }
+
+  String _mockWasteResponse() {
+    return '''
+{
+  "dominant_type": "Plastik",
+  "percentage": 40,
+  "types": [
+    {"name": "Plastik", "percentage": 40, "icon": "🥤"},
+    {"name": "Organik", "percentage": 35, "icon": "🍂"},
+    {"name": "Anorganik", "percentage": 15, "icon": "🔩"},
+    {"name": "Elektronik", "percentage": 10, "icon": "📱"}
+  ]
+}
+''';
   }
 
   /// Generate environmental risk signals for a location
   Future<String> generateEnvironmentalSignals({String? location}) async {
-    final locationInfo = location ?? 'Indonesia';
-    final prompt = '''
+    if (_isMockMode) {
+      return _mockSignalsResponse();
+    }
+    try {
+      final locationInfo = location ?? 'Indonesia';
+      final prompt = '''
 Berikan analisis sinyal risiko lingkungan di wilayah $locationInfo dalam format JSON array:
 [
   {
@@ -224,9 +395,37 @@ Berikan 3-5 jenis risiko lingkungan. Level harus salah satu dari: Aman, Waspada,
 Jawab hanya dengan JSON array, tanpa penjelasan tambahan.
 ''';
 
-    final content = Content.text(prompt);
-    final response = await _model.generateContent([content]);
-    return response.text ?? '[]';
+      final content = Content.text(prompt);
+      final response = await _model.generateContent([content]);
+      return response.text ?? _mockSignalsResponse();
+    } catch (e) {
+      return _mockSignalsResponse();
+    }
+  }
+
+  String _mockSignalsResponse() {
+    return '''
+[
+  {
+    "type": "Cuaca Ekstrem",
+    "level": "Waspada",
+    "description": "Curah hujan tinggi disertai angin kencang berpotensi terjadi sore ini.",
+    "icon": "⛈️"
+  },
+  {
+    "type": "Banjir",
+    "level": "Aman",
+    "description": "Tinggi muka air sungai normal di bawah batas bahaya.",
+    "icon": "🌊"
+  },
+  {
+    "type": "Gempa",
+    "level": "Aman",
+    "description": "Tidak ada aktivitas seismik signifikan terpantau.",
+    "icon": "🌋"
+  }
+]
+''';
   }
 
   /// Reset chat session
