@@ -154,10 +154,27 @@ class ApiService {
 
   /// Decode JSON response or throw formatted error
   static Map<String, dynamic> decodeResponse(http.Response response) {
-    final data = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return data;
+    try {
+      final bodyStr = utf8.decode(response.bodyBytes);
+      if (!bodyStr.trim().startsWith('{')) {
+        throw Exception('Server error (${response.statusCode}): Tanggapan server tidak valid.');
+      }
+      final data = jsonDecode(bodyStr) as Map<String, dynamic>;
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return data;
+      }
+      
+      // Auto-logout on unauthorized/forbidden sessions (JWT expired or user deleted from DB)
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        signOut();
+        throw Exception(data['error'] ?? 'Sesi Anda telah berakhir. Silakan login kembali.');
+      }
+      
+      throw Exception(data['error'] ?? 'Terjadi kesalahan server (${response.statusCode})');
+    } on FormatException {
+      throw Exception('Server error (${response.statusCode}): Tanggapan server tidak valid (bukan JSON).');
+    } catch (e) {
+      throw Exception(e.toString().replaceAll('Exception: ', ''));
     }
-    throw Exception(data['error'] ?? 'Terjadi kesalahan server (${response.statusCode})');
   }
 }

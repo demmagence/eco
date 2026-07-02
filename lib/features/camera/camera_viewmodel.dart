@@ -28,7 +28,7 @@ class CameraViewModel extends ChangeNotifier {
 
       _controller = CameraController(
         _cameras.first,
-        ResolutionPreset.high,
+        ResolutionPreset.medium,
         enableAudio: false,
       );
 
