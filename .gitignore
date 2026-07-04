@@ -50,3 +50,6 @@ app.*.map.json
 
 # Flutter devtools config
 devtools_options.yaml
+
+# API keys and credentials configuration
+/lib/core/constants/api_constants.dart
